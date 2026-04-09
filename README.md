@@ -137,17 +137,18 @@ zabbix-hardware-monitoring/
 │   └── template-mapping.md
 ├── templates/
 │   ├── dell/
-│   │   └── DELL PowerEdge R720 by SNMP_consistent-valuemaps_fixed.yaml
+│   │   └── DELL PowerEdge R720.yaml
+│   │   └── DELL PowerEdge R740.yaml
 │   ├── hpe/
-│   │   └── HPE ProLiant DL380 SNMP Unified_consistent-valuemaps.yaml
+│   │   └── HPE ProLiant DL380 SNMP.yaml
 │   ├── ibm/
-│   │   └── IBM IMM SNMPv3_consistent-valuemaps_fixed.yaml
+│   │   └── IBM IMM SNMPv3.yaml
 │   ├── lenovo/
-│   │   └── Lenovo XCC SNMPv3_consistent-valuemaps.yaml
+│   │   └── Lenovo XCC SNMPv3.yaml
 │   ├── proxmox/
-│   │   └── Proxmox RAID SMART_consistent-valuemaps_fixed.yaml
+│   │   └── Proxmox RAID.yaml
 │   └── synology/
-│       └── Synology NAS SNMP_consistent-valuemaps_fixed.yaml
+│       └── Synology NAS SNMP.yaml
 ├── scripts/
 │   └── proxmox/
 │       └── proxmox_raid_pd_attr.sh.example
@@ -165,6 +166,7 @@ zabbix-hardware-monitoring/
 | Vendor / Platform | Method | Main coverage |
 |---|---|---|
 | Dell PowerEdge R720 | SNMP | System health, controllers, virtual disks, physical disks, fan/temperature/power |
+| Dell PowerEdge R740 | SNMP | System health, controllers, virtual disks, physical disks, fan/temperature/power |
 | HPE ProLiant DL380 | SNMP | Unified health model, array cache, controllers, disks, network adapters, fans |
 | IBM IMM | SNMPv3 | System health, storage pools, RAID PD/VD, PSU, temp, fan, SSD wear |
 | Lenovo XCC | SNMPv3 | Hardware, PSU, fan, memory, CPU, firmware, RAID PD/VD, SSD wear |
