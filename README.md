@@ -73,6 +73,27 @@ So the value of this repository is not only in the templates themselves — it i
 
 ---
 
+## Project start and deployment approach
+
+When this project started, the first design decision was to run **Zabbix inside a container on a virtual machine**.
+
+That decision was made to make the setup:
+
+- easier to **replicate**
+- easier to **rebuild**
+- easier to **move between environments**
+- easier to **document in a clean and repeatable way**
+
+Using a containerized Zabbix deployment on a VM gave a practical balance between:
+
+- VM-level isolation and infrastructure control
+- container-level portability
+- simpler documentation and repeatability for future deployments
+
+This repository should therefore be understood not only as a template collection, but also as the documented result of building a **replicable monitoring environment**.
+
+---
+
 ## Why this repository exists
 
 Zabbix hardware monitoring often becomes messy in real environments because each vendor exposes:
@@ -81,6 +102,7 @@ Zabbix hardware monitoring often becomes messy in real environments because each
 - different status texts and numeric values
 - different discovery patterns
 - different dashboard behavior
+- different levels of built-in Zabbix template support
 
 The goal of this repo is to make those templates **portable, understandable, and reusable**.
 
@@ -90,6 +112,60 @@ This repo is especially useful if you want:
 - a **repeatable process** for importing and maintaining templates
 - **dashboard-friendly state normalization** across different vendors
 - a clean GitHub repository you can extend over time
+
+---
+
+## Template development journey
+
+One of the main practical challenges during this project was hardware template availability.
+
+In our data center, one of the most common server models is the **Lenovo SR650**. Zabbix did not provide a built-in template that matched our needs for this hardware, so the initial plan of simply importing an official template was not possible.
+
+### What happened first
+
+The first step was to search online for an existing Lenovo community template. Only **one community template** could be found that was somewhat relevant.
+
+### Why that was not enough
+
+Although that template was helpful as a starting point, it was **not suitable enough for our environment and monitoring requirements**. In practice, that meant:
+
+- the available items were incomplete for our needs
+- the structure was not aligned with the dashboard style we wanted
+- the extracted values were not consistent enough for unified visual monitoring
+- it did not fully solve the problem of cross-vendor status consistency
+
+### What had to be done instead
+
+Because of that, the template work had to move from simple reuse to actual template engineering.
+
+The workflow became:
+
+1. inspect the vendor **MIB tree**
+2. browse the MIB structure using the **Observium MIB browser / database**
+3. identify the useful OIDs required for monitoring
+4. test and validate which values were operationally meaningful
+5. build Zabbix items, discovery rules, value maps, and dashboards from those OIDs
+
+### AI-assisted template building
+
+To speed up the template creation process, **AI was used as an accelerator**, especially for:
+
+- generating template YAML structure faster
+- building discovery prototypes more quickly
+- producing initial value maps
+- iterating on vendor-specific monitoring logic
+- helping maintain **value consistency across templates** for unified dashboards
+
+AI made the process faster, but the monitoring logic still depended on:
+
+- understanding the vendor MIBs
+- validating OIDs manually
+- checking extracted values against actual device behavior
+- aligning value maps so dashboards would stay visually consistent
+
+So this project was not simply "generate a template and import it". It was a structured process of:
+
+> **finding the correct MIB path, selecting useful OIDs, validating outputs, and then shaping the result into dashboard-friendly templates.**
 
 ---
 
@@ -117,6 +193,7 @@ Where possible, templates normalize component states into a common dashboard mod
 
 - `0` = Unknown / not available
 - `1` = OK / normal / online
+- `2` = Spare / standby / unused where applicable
 - `3` = Warning / degraded
 - `4` = Rebuilding / in progress
 - `5` = Failed / critical / offline
@@ -181,7 +258,7 @@ zabbix-hardware-monitoring/
 Different vendors report different states. This repository maps them into predictable dashboard values so tiles can use a common visual language:
 
 - 🟩 **Green** → OK / normal
-- 🟦 **Blue** → Hot-spare / Ugood 
+- 🟦 **Blue** → hot-spare / unconfigured-good / standby / in a healthy non-active role
 - 🟨 **Yellow / orange** → warning / degraded / rebuilding
 - 🟥 **Red** → failed / critical / offline
 - ⬜ **Gray** → unknown / unavailable
@@ -200,6 +277,17 @@ Low-level discovery is heavily used for:
 
 ### ✅ Separation of vendor logic and dashboard logic
 Vendor-specific logic stays inside each template, while normalized items make dashboards easier to share and maintain.
+
+### ✅ Consistent value mapping for unified dashboards
+One important design goal in this project was to keep dashboard semantics as consistent as possible across vendors.
+
+That means the templates were adjusted so that, where reasonable:
+
+- the same numeric status means the same visual severity
+- honeycomb tiles can use the same threshold logic
+- cross-vendor dashboards remain easier to understand operationally
+
+This is especially important in mixed environments where Dell, HPE, Lenovo, IBM, Synology, and Proxmox systems may all appear in the same monitoring platform.
 
 ---
 
@@ -298,42 +386,116 @@ sudo ss -tulpn | grep :10050
 
 ## Adding a device into Zabbix
 
----
-#### 1. Navigate to **Data-collection** ----> **Hosts** (on the left side)
+Before adding a device in the Zabbix UI, the most important prerequisite is that the device must already be prepared for monitoring.
 
+### Step 0: Create an SNMP monitoring account on the device
+
+For SNMP-based monitoring, you first need to create or enable an **SNMP monitoring account / SNMP configuration** on the server, appliance, or management controller.
+
+This part is vendor-specific.
+
+Different devices have different:
+
+- web interfaces
+- menu paths
+- authentication methods
+- SNMP version support
+- security settings
+- permission models
+
+So in practice, this means you often need to do some **device-specific research** to find the correct method for that particular hardware.
+
+Examples:
+
+- Dell iDRAC SNMP configuration is different from Lenovo XCC
+- Lenovo XCC setup is different from IBM IMM
+- Synology DSM SNMP setup is different from server BMC interfaces
+- HPE iLO / SNMP process differs again
+
+So the real onboarding flow is usually:
+
+1. identify the device vendor and model
+2. search for the proper SNMP enablement process for that device
+3. create the monitoring account or configure SNMP community / SNMPv3 user
+4. confirm network reachability from Zabbix to the target
+5. test SNMP access
+6. then add the host in Zabbix
+
+### Recommended preparation checklist
+
+Before creating the host in Zabbix, make sure you know:
+
+- device IP / DNS name
+- vendor and model
+- whether it uses **SNMPv2c** or **SNMPv3**
+- community string or SNMPv3 credentials
+- the correct template to apply
+- whether firewall rules allow Zabbix to reach UDP/161
+
+---
+
+### 1. Navigate to **Data collection → Hosts**
 
 ![Screenshot](images/image1.png)
 
 ---
-#### 2.  Click **Cteate host** on the top right corner.
+
+### 2. Click **Create host**
 
 ![Screenshot](images/image2.png)
 
 ---
 
-#### 3.  Fill up all these **feilds** accordingly.
-     
-  1. Hostname (must be **unique** for every device)
+### 3. Fill in the basic host information
 
-  2. The name you want your device to be **shown as**
+Provide the following carefully:
 
-  3. Use the **template** according to the device. (can use templates directory)
-
-  4. Select a host group so that it is **easilty filterable** in future (eg. lenovo servers, dell servers)
-
-  5. Select interface accoding to need. (i used snmp)
+1. **Hostname** — must be unique for every device
+2. **Visible name** — the display name you want shown in Zabbix
+3. **Template** — select the correct vendor template from this repository
+4. **Host group** — choose a group that makes filtering easier later (for example: Lenovo Servers, Dell Servers, NAS, Proxmox)
+5. **Interface type** — choose the required interface type, most commonly **SNMP** for these templates
 
 ![Screenshot](images/image3.png)
 
-
 ---
 
+### 4. Fill in the SNMP interface details
 
-#### 3.  Fill up all of the snmp required feild according to version
+Enter the required SNMP fields according to the SNMP version used by the device:
+
+- for **SNMPv2c**, configure the community string
+- for **SNMPv3**, configure the username, authentication, privacy method, and related credentials
+
+Make sure the SNMP settings entered in Zabbix match exactly what was configured on the device.
 
 ![Screenshot](images/image4.png)
 
 ---
+
+### 5. Validate after adding the host
+
+After saving the host:
+
+- confirm the template linked successfully
+- check **Latest data**
+- confirm discovery rules start creating items
+- verify that dashboard tiles and honeycomb widgets show expected values
+- test whether the value mapping looks correct for that device type
+
+---
+
 ## Maintainer note
 
-This repository reflects a practical hardware monitoring implementation where templates were developed by reading MIBs, identifying useful OIDs, generating or adapting template logic, and mapping hardware states into consistent dashboard values.
+This repository reflects a practical hardware monitoring implementation where templates were developed by:
+
+- understanding the operational monitoring need
+- containerizing Zabbix on a VM for easier replication
+- reading vendor MIBs
+- identifying useful OIDs
+- checking MIB trees through the Observium MIB browser/database
+- generating and refining template logic with AI assistance
+- validating extracted values against actual hardware behavior
+- mapping hardware states into consistent dashboard values
+
+In other words, this repository is the result of both **monitoring design** and **template engineering**, built to reduce manual hardware checking and provide clearer, more unified infrastructure visibility.
