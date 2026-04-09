@@ -1,4 +1,6 @@
-# Zabbix Hardware Monitoring Templates
+# Zabbix Infrastructure Monitoring
+
+![Screenshot](images/image5.png)
 
 A production-oriented collection of **Zabbix 7.4 hardware monitoring templates** for mixed infrastructure environments.
 

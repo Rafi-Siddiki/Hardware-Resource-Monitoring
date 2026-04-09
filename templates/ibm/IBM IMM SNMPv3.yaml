@@ -1,0 +1,2042 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+  - uuid: 0f609231b71d482688fa67d37d9b3328
+    name: Templates/Servers Hardware
+  templates:
+  - uuid: 29cb5012b8e641178a158ee5ead3cb9e
+    template: IBM IMM SNMPv3
+    name: IBM IMM SNMPv3
+    description: |
+      Unified IMM-MIB SNMPv3 template (styled after the provided Lenovo XCC template).
+      Includes:
+        - System power, system health and machine VPD
+        - Temperature + voltage + fan + PSU discoveries with numeric dashboard items
+        - CPU + memory + LED discoveries
+        - RAID controller, physical drive, storage pool and virtual drive discoveries
+        - SSD wear parsing from raidDriveRemainingLife for honeycomb dashboarding
+        - Adapter/network port discoveries for link status and speed
+    vendor:
+      name: Custom
+      version: 7.0-imm-unified
+    groups:
+    - name: Templates/Servers Hardware
+    items:
+    - uuid: 68e40e2301b94a57b652d4b4cdad0701
+      name: Adapter OOB Capable
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.14.1.0
+      key: adapteroobcapable
+      history: 2d
+      trends: 5d
+      valuemap:
+        name: raidoobcapable
+    - uuid: ebbf46be0aa7450099e5d230c539ea0f
+      name: Power Status
+      type: SNMP_AGENT
+      snmp_oid: .1.3.6.1.4.1.2.3.51.3.5.1.1.0
+      key: currentSysPowerStatus
+      history: 2d
+      trends: 5d
+      valuemap:
+        name: currentSysPowerStatus
+    - uuid: 0ff847d73925444eb974c2338d3152fb
+      name: Identity LED
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.8.1.0
+      key: identityLED
+      history: 2d
+      trends: 5d
+      valuemap:
+        name: ledstate
+    - uuid: 72221c6e8a98417fb03e19ef2ca79771
+      name: Restart Count
+      type: SNMP_AGENT
+      snmp_oid: .1.3.6.1.4.1.2.3.51.3.5.1.3.0
+      key: IMMrestartCount
+      history: 2d
+      trends: 5d
+    - uuid: d8ee7c84906845d9bb6292cc8d7e2b43
+      name: System Health Status
+      type: SNMP_AGENT
+      snmp_oid: .1.3.6.1.4.1.2.3.51.3.1.4.1.0
+      key: IMMsystemHealthStat
+      delay: '300'
+      history: 2d
+      trends: 5d
+      valuemap:
+        name: IMM-MIB::systemHealthStat
+    - uuid: 7e6a54233e0d43018b7ea961ca27de2d
+      name: System State
+      type: SNMP_AGENT
+      snmp_oid: .1.3.6.1.4.1.2.3.51.3.5.1.4.0
+      key: IMMsystemState
+      delay: '300'
+      history: 2d
+      trends: 5d
+      valuemap:
+        name: systemState
+    - uuid: 1e641ab435144eca8de24f451d17455a
+      name: Machine Model
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.5.2.1.2.0
+      key: machinemodel
+      delay: 1h
+      history: 2d
+      value_type: TEXT
+      tags:
+      - tag: Application
+        value: hardware
+    - uuid: 226a29e942c64df78f1e01bfed5d5eaa
+      name: Product Name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.5.2.1.5.0
+      key: machineproductname
+      delay: 1h
+      history: 2d
+      value_type: TEXT
+      tags:
+      - tag: Application
+        value: hardware
+    - uuid: cade466c48b240b0afc8674bee10acc7
+      name: Machine Serial Number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.5.2.1.3.0
+      key: machinesrno
+      delay: 1h
+      history: 2d
+      value_type: TEXT
+      tags:
+      - tag: Application
+        value: hardware
+    - uuid: 9c1391b30a564e3d8096cfc0bdd17e61
+      name: Machine Type
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.5.2.1.1.0
+      key: machinetype
+      delay: 1h
+      history: 2d
+      value_type: TEXT
+      tags:
+      - tag: Application
+        value: hardware
+    - uuid: 27227315f8ea4b1396bddf2aae856bcb
+      name: System UUID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.5.2.1.4.0
+      key: machineuuid
+      delay: 1h
+      history: 2d
+      value_type: TEXT
+      tags:
+      - tag: Application
+        value: hardware
+    - uuid: ac00337a272c4bfca6e8a7fccac8030b
+      name: Total power in use
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.10.1.10.0
+      key: power.inuse
+      delay: 120s
+      history: 7d
+      trends: 30d
+      units: W
+    - uuid: 67fd41b7446043cb9df011351fccc38e
+      name: Power On Hours
+      type: SNMP_AGENT
+      snmp_oid: .1.3.6.1.4.1.2.3.51.3.5.1.2.0
+      key: powerOnHours
+      history: 2d
+      trends: 5d
+      units: uptime
+    - uuid: c18917121091483b9de8e7150b91c0f8
+      name: RAID OOB Capable
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.1.0
+      key: raidoobcapable
+      history: 2d
+      trends: 5d
+      description: If raidOOBCapable is disabled, RAID table information is not available.
+      valuemap:
+        name: raidoobcapable
+    - uuid: b7a12d4b8e06468ca518a843153316f7
+      name: Trap
+      type: SNMP_TRAP
+      key: snmptrap["General"]
+      history: 90d
+      value_type: LOG
+      logtimefmt: hh:mm:ss yyyy/MM/dd
+      tags:
+      - tag: Application
+        value: Status
+    discovery_rules:
+    - uuid: 1e84ce787da84b3aa9d632e0040d7075
+      name: Disk module Discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#DISKINDEX},1.3.6.1.4.1.2.3.51.3.1.12.2.1.1,{#DISKNAME},1.3.6.1.4.1.2.3.51.3.1.12.2.1.2]
+      key: diskmodule.discovery
+      lifetime: 30d
+      enabled_lifetime_type: DISABLE_NEVER
+      item_prototypes:
+      - uuid: d59d930fe2d04149be7f1c9bfde72775
+        name: 'Disk module [{#DISKNAME}]: Status (raw)'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.12.2.1.3.{#DISKINDEX}
+        key: diskmodule.status.raw[{#DISKINDEX}]
+        history: 30d
+        value_type: TEXT
+        tags:
+        - tag: hardware
+          value: storage
+      - uuid: e66ac80ff34d44d2a66d82fe31244f42
+        name: 'Disk module [{#DISKNAME}]: Status'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.12.2.1.3.{#DISKINDEX}
+        key: diskmodule.status[{#DISKINDEX}]
+        history: 30d
+        trends: 5d
+        valuemap:
+          name: XCC Disk status
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - |
+            var s = (value || '').trim().toLowerCase();
+            if (s === '' || s === 'unknown' || s === 'n/a' || s === 'na') return 0;
+            if (s === 'normal' || s === 'ok' || s === 'optimal' || s === 'online') return 1;
+            if (s.indexOf('warn') !== -1 || s.indexOf('degrad') !== -1 || s.indexOf('noncritical') !== -1 || s.indexOf('non-critical') !== -1 || s.indexOf('rebuild') !== -1 || s.indexOf('rebuilding') !== -1) return 3;
+            return 5;
+        tags:
+        - tag: hardware
+          value: health
+        - tag: hardware
+          value: storage
+        trigger_prototypes:
+        - uuid: 1f01d2b5a2d74d8c8bdaef7dc8ebc070
+          expression: last(/IBM IMM SNMPv3/diskmodule.status[{#DISKINDEX}])>=5
+          name: 'Disk module [{#DISKNAME}]: FAILED/DEGRADED'
+          priority: HIGH
+          manual_close: 'YES'
+    - uuid: 7346c43571864851a243495a290fbbf2
+      name: Fan Discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#FANINDEX},1.3.6.1.4.1.2.3.51.3.1.3.2.1.1,{#FANNAME},1.3.6.1.4.1.2.3.51.3.1.3.2.1.2]
+      key: fan.discovery
+      lifetime: 30d
+      enabled_lifetime_type: DISABLE_NEVER
+      item_prototypes:
+      - uuid: 00743279df76460ab34dee5d53991bfd
+        name: 'Fan [{#FANNAME}]: Status'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.3.2.1.10.{#FANINDEX}
+        key: fanhealth[{#FANINDEX}]
+        history: 2d
+        trends: 5d
+        valuemap:
+          name: XCC Fan status
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - |
+            var s = (value || '').trim().toLowerCase();
+            if (s === '' || s === 'unknown' || s === 'not installed' || s === 'not present' || s === 'absent' || s === 'n/a' || s === 'na') return 4;
+            if (s === 'normal' || s === 'ok') return 1;
+            return 5;
+        tags:
+        - tag: hardware
+          value: fan
+        - tag: hardware
+          value: health
+        trigger_prototypes:
+        - uuid: 13d2a2b1e4464f8fb67a38d4831fa755
+          expression: last(/IBM IMM SNMPv3/fanhealth[{#FANINDEX}])>=5
+          name: 'Fan [{#FANNAME}]: FAILED/DEGRADED'
+          priority: HIGH
+          manual_close: 'YES'
+      - uuid: 66fc5dc4e11c4ed9ad9d35ae5cabc1c2
+        name: 'Fan [{#FANNAME}]: Speed'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.3.2.1.3.{#FANINDEX}
+        key: fanspeed[{#FANINDEX}]
+        history: 2d
+        value_type: TEXT
+        tags:
+        - tag: hardware
+          value: fan
+      - uuid: 3b33120287f747299029f4255fd42ee5
+        name: 'Fan [{#FANNAME}]: Description'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.3.2.1.2.{#FANINDEX}
+        key: fan[{#FANINDEX}]
+        history: 2d
+        value_type: TEXT
+        tags:
+        - tag: hardware
+          value: fan
+    - uuid: f22b3b0e10a1424b8bd789a83c493023
+      name: Firmware Discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#FIRMINDEX},1.3.6.1.4.1.2.3.51.3.1.5.1.1.1,{#FIRMTYPE},1.3.6.1.4.1.2.3.51.3.1.5.1.1.2]
+      key: firmwarediscovery
+      lifetime: 30d
+      enabled_lifetime_type: DISABLE_NEVER
+      item_prototypes:
+      - uuid: baf3e2772b0d4143b97eeb4070c3c3bb
+        name: 'Release Date: {#FIRMTYPE}'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.5.1.1.4.{#FIRMINDEX}
+        key: reldate[{#FIRMINDEX}]
+        history: 90d
+        value_type: TEXT
+        tags:
+        - tag: Application
+          value: Firmware
+      - uuid: 682477265e9d43dca6e442652076f45e
+        name: 'Version: {#FIRMTYPE}'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.5.1.1.3.{#FIRMINDEX}
+        key: version[{#FIRMINDEX}]
+        history: 90d
+        value_type: TEXT
+        tags:
+        - tag: Application
+          value: Firmware
+    - uuid: 36924396b1c0477e9829340967c1e022
+      name: LED Status Discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#LEDINDEX},1.3.6.1.4.1.2.3.51.3.1.8.2.1.1,{#LEDLABEL},1.3.6.1.4.1.2.3.51.3.1.8.2.1.4]
+      key: leddiscovery
+      lifetime: 30d
+      enabled_lifetime_type: DISABLE_NEVER
+      item_prototypes:
+      - uuid: a98e71fd733141c9843c75bc0a29a47c
+        name: 'LED Color: {#LEDLABEL}'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.8.2.1.6.{#LEDINDEX}
+        key: ledcolor[{#LEDINDEX}]
+        history: 2d
+        value_type: TEXT
+      - uuid: 43b54092094d43b7a12017d8c8fd4645
+        name: 'LED State: {#LEDLABEL}'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.8.2.1.5.{#LEDINDEX}
+        key: ledstate[{#LEDINDEX}]
+        history: 2d
+        trends: 5d
+        valuemap:
+          name: ledstate
+    - uuid: fbe80646975d4ed2ad83d78395f2c101
+      name: Memory module Discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MEMINDEX},1.3.6.1.4.1.2.3.51.3.1.5.21.1.1,{#MEMDISC},1.3.6.1.4.1.2.3.51.3.1.5.21.1.2,{#MEMTYPE},1.3.6.1.4.1.2.3.51.3.1.5.21.1.6]
+      key: memorydiscovery
+      lifetime: 30d
+      enabled_lifetime_type: DISABLE_NEVER
+      item_prototypes:
+      - uuid: 0ef317bd5ae64b2abbde1b12efb327d3
+        name: 'Memory module [{#MEMDISC}]: Part number'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.5.21.1.3.{#MEMINDEX}
+        key: mempartno[{#MEMINDEX}]
+        history: 2d
+        value_type: TEXT
+        tags:
+        - tag: hardware
+          value: memory
+      - uuid: 650e6efee35a467991ea7348fa1c52e6
+        name: 'Memory module [{#MEMDISC}]: Serial'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.5.21.1.4.{#MEMINDEX}
+        key: memserial[{#MEMINDEX}]
+        history: 2d
+        value_type: TEXT
+        tags:
+        - tag: hardware
+          value: memory
+      - uuid: de17d8c2f8d446dcaf3b23f5ff98e6ca
+        name: 'Memory module [{#MEMDISC}]: Size'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.5.21.1.7.{#MEMINDEX}
+        key: memsize[{#MEMINDEX}]
+        history: 2d
+        trends: 5d
+        units: '!GB'
+        tags:
+        - tag: hardware
+          value: memory
+      - uuid: 6d6e1f00915448fab220ddd2bfcc6550
+        name: 'Memory module [{#MEMDISC}]: Status (raw)'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.5.21.1.8.{#MEMINDEX}
+        key: memstatus.raw[{#MEMINDEX}]
+        history: 30d
+        value_type: TEXT
+        tags:
+        - tag: hardware
+          value: memory
+      - uuid: db5e8953028d44249e3a63af16402c44
+        name: 'Memory module [{#MEMDISC}]: Status'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.5.21.1.8.{#MEMINDEX}
+        key: memstatus[{#MEMINDEX}]
+        history: 2d
+        trends: 5d
+        valuemap:
+          name: XCC Memory status
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - |
+            var s = (value || '').trim().toLowerCase();
+            if (s === '' || s === 'unknown' || s === 'n/a' || s === 'na') return 0;
+            if (s === 'normal' || s === 'ok' || s === 'optimal' || s === 'online') return 1;
+            if (s.indexOf('warn') !== -1 || s.indexOf('degrad') !== -1 || s.indexOf('noncritical') !== -1 || s.indexOf('non-critical') !== -1 || s.indexOf('rebuild') !== -1 || s.indexOf('rebuilding') !== -1) return 3;
+            return 5;
+        tags:
+        - tag: hardware
+          value: memory
+        trigger_prototypes:
+        - uuid: fc72044021e8469993d11355bbec032e
+          expression: last(/IBM IMM SNMPv3/memstatus[{#MEMINDEX}])>=5
+          name: 'Memory module [{#MEMDISC}]: FAILED/DEGRADED'
+          priority: HIGH
+          manual_close: 'YES'
+      - uuid: a045ddeaac214353b1699e87b2ec9e5f
+        name: 'Memory module [{#MEMDISC}]: Type'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.5.21.1.6.{#MEMINDEX}
+        key: memtype[{#MEMINDEX}]
+        history: 2d
+        value_type: TEXT
+        tags:
+        - tag: hardware
+          value: memory
+    - uuid: 42a2650be8094d57ba4299dbf3a7b829
+      name: Network card Discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#NETINDEX},1.3.6.1.4.1.2.3.51.3.1.14.4.1.1,{#NETNAME},1.3.6.1.4.1.2.3.51.3.1.14.4.1.2]
+      key: network.card
+      lifetime: 30d
+      enabled_lifetime_type: DISABLE_NEVER
+      description: Discover Ethernet/network ports from adapterNetworkPortTable.
+      item_prototypes:
+      - uuid: 76af79316107468fa17e65e95bcfd2ce
+        name: 'Network Adapter Link speed: {#NETNAME}'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.14.4.1.21.{#NETINDEX}
+        key: adapterlinkspeed[{#NETINDEX}]
+        history: 2d
+        value_type: TEXT
+        tags:
+        - tag: type
+          value: network
+      - uuid: 67597f2d031646fc92c5260344b2af0a
+        name: 'Network Adapter Link status: {#NETNAME}'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.14.4.1.20.{#NETINDEX}
+        key: adapterlinkstatus[{#NETINDEX}]
+        history: 2d
+        value_type: TEXT
+        tags:
+        - tag: type
+          value: network
+      - uuid: 131cd3b8c6a4444f9a0489201281e9f1
+        name: 'Network Adapter: {#NETNAME}'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.14.4.1.2.{#NETINDEX}
+        key: adapterstatus[{#NETINDEX}]
+        history: 2d
+        value_type: TEXT
+        tags:
+        - tag: type
+          value: network
+    - uuid: ee007c2c330d45b08f90e3aef1f5643a
+      name: Processor Discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#CPUINDEX},1.3.6.1.4.1.2.3.51.3.1.5.20.1.1,{#CPUDESC},1.3.6.1.4.1.2.3.51.3.1.5.20.1.2]
+      key: processor.discovery
+      lifetime: 30d
+      enabled_lifetime_type: DISABLE_NEVER
+      item_prototypes:
+      - uuid: ba9daa12875148c5aa7219711ecad817
+        name: 'CPU [{#CPUDESC}]: Cores'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.5.20.1.7.{#CPUINDEX}
+        key: cpucore[{#CPUINDEX}]
+        history: 2d
+        trends: 5d
+        tags:
+        - tag: hardware
+          value: processor
+      - uuid: 17d0a021fcfe4430880440365e570dd7
+        name: 'CPU [{#CPUDESC}]: Speed'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.5.20.1.3.{#CPUINDEX}
+        key: cpuspeed[{#CPUINDEX}]
+        history: 2d
+        trends: 5d
+        units: '!MHz'
+        tags:
+        - tag: hardware
+          value: processor
+      - uuid: 26cf714cd005476a917cc91ec3584e4a
+        name: 'CPU [{#CPUDESC}]: Status (raw)'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.5.20.1.11.{#CPUINDEX}
+        key: cpustatus.raw[{#CPUINDEX}]
+        history: 30d
+        value_type: TEXT
+        tags:
+        - tag: hardware
+          value: processor
+      - uuid: ed4e03c0fad94a93a578d3ab1f209040
+        name: 'CPU [{#CPUDESC}]: Status'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.5.20.1.11.{#CPUINDEX}
+        key: cpustatus[{#CPUINDEX}]
+        history: 2d
+        trends: 5d
+        valuemap:
+          name: XCC CPU status
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - |
+            var s = (value || '').trim().toLowerCase();
+            if (s === '' || s === 'unknown' || s === 'n/a' || s === 'na') return 0;
+            if (s === 'normal' || s === 'ok' || s === 'optimal' || s === 'online') return 1;
+            if (s.indexOf('warn') !== -1 || s.indexOf('degrad') !== -1 || s.indexOf('noncritical') !== -1 || s.indexOf('non-critical') !== -1 || s.indexOf('rebuild') !== -1 || s.indexOf('rebuilding') !== -1) return 3;
+            return 5;
+        tags:
+        - tag: hardware
+          value: health
+        - tag: hardware
+          value: processor
+        trigger_prototypes:
+        - uuid: a14f6df5b6d84a49b213575ce6492c8a
+          expression: last(/IBM IMM SNMPv3/cpustatus[{#CPUINDEX}])>=5
+          name: 'CPU [{#CPUDESC}]: FAILED/DEGRADED'
+          priority: HIGH
+          manual_close: 'YES'
+      - uuid: 40519c7d7f254aadad6c63553cb8bdc1
+        name: 'CPU [{#CPUDESC}]: Threads'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.5.20.1.8.{#CPUINDEX}
+        key: cputhreads[{#CPUINDEX}]
+        history: 2d
+        trends: 5d
+        tags:
+        - tag: hardware
+          value: processor
+    - uuid: 89605f14dd8f49859cc8dbcceae4a06e
+      name: PSU Discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#PSUINDEX},1.3.6.1.4.1.2.3.51.3.1.11.2.1.1,{#PSU_DESCR},1.3.6.1.4.1.2.3.51.3.1.11.2.1.2]
+      key: psu.discovery
+      delay: 1h
+      lifetime: 30d
+      enabled_lifetime_type: DISABLE_NEVER
+      item_prototypes:
+      - uuid: bfdfa0af33d943c4b1070e4fa273f343
+        name: 'Power supply [{#PSU_DESCR}]: Serial'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.11.2.1.5.{#PSUINDEX}
+        key: sensor.psu.serial[{#PSUINDEX}]
+        history: 2w
+        value_type: TEXT
+        tags:
+        - tag: Application
+          value: Power Supply
+      - uuid: 902aabe1a0844a4e9edc67729d9bb70c
+        name: 'Power supply [{#PSU_DESCR}]: Status'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.11.2.1.6.{#PSUINDEX}
+        key: sensor.psu.status[powerHealthStatus.{#PSUINDEX}]
+        delay: 3m
+        history: 2w
+        trends: 5d
+        valuemap:
+          name: XCC PSU status
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - |
+            var s = (value || '').trim().toLowerCase();
+            if (s === '' || s === 'unknown' || s === 'n/a' || s === 'na') return 0;
+            if (s === 'normal' || s === 'ok' || s === 'optimal' || s === 'online') return 1;
+            if (s.indexOf('warn') !== -1 || s.indexOf('degrad') !== -1 || s.indexOf('noncritical') !== -1 || s.indexOf('non-critical') !== -1 || s.indexOf('rebuild') !== -1 || s.indexOf('rebuilding') !== -1) return 3;
+            return 5;
+        tags:
+        - tag: Application
+          value: Power Supply
+        trigger_prototypes:
+        - uuid: 1ce739703c6246b7a58234db27ff9c81
+          expression: last(/IBM IMM SNMPv3/sensor.psu.status[powerHealthStatus.{#PSUINDEX}])>=5
+          name: 'Power supply [{#PSU_DESCR}]: FAILED'
+          priority: HIGH
+          manual_close: 'YES'
+    - uuid: 8848d24039d3465b87a0592c8858bf76
+      name: RAID Physical Drive Discovery (IMM)
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#PDINDEX},1.3.6.1.4.1.2.3.51.3.1.13.1.3.1.1,{#PDNAME},1.3.6.1.4.1.2.3.51.3.1.13.1.3.1.2,{#PDTYPE},1.3.6.1.4.1.2.3.51.3.1.13.1.3.1.7]
+      key: raid.pd.discovery
+      lifetime: 30d
+      enabled_lifetime_type: DISABLE_NEVER
+      description: Discover RAID physical drives from IMM-MIB raidDriveTable.
+      item_prototypes:
+      - uuid: 53a970ed061c4c26b075985b88ae5fd5
+        name: 'Physical disk [{#PDNAME}]: Capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.3.1.12.{#PDINDEX}
+        key: raid.pd.capacity[{#PDINDEX}]
+        delay: 1h
+        history: 30d
+        value_type: TEXT
+        tags:
+        - tag: Application
+          value: RAID Physical Disks
+      - uuid: f75ab49054b44b48a32caadb356417cc
+        name: 'Physical disk [{#PDNAME}]: Health (raw)'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.3.1.11.{#PDINDEX}
+        key: raid.pd.health.raw[{#PDINDEX}]
+        delay: 3m
+        history: 30d
+        value_type: TEXT
+        tags:
+        - tag: Application
+          value: RAID Physical Disks
+      - uuid: 720bc937a2d9419c9c0ed58b62038b73
+        name: 'Physical disk [{#PDNAME}]: Health'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.3.1.11.{#PDINDEX}
+        key: raid.pd.health[{#PDINDEX}]
+        delay: 3m
+        history: 30d
+        trends: 5d
+        valuemap:
+          name: XCC RAID PD health
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - |
+            var s = (value || '').trim().toLowerCase();
+            if (s === '') return 0;
+            if (s === 'normal') return 1;
+            if (s.indexOf('degrad') !== -1 || s.indexOf('warn') !== -1 || s.indexOf('noncritical') !== -1 || s.indexOf('non-critical') !== -1) return 3;
+            return 5;
+        tags:
+        - tag: Application
+          value: RAID Physical Disks
+        trigger_prototypes:
+        - uuid: 0b104431e75d45bfaa0eed9ccdad3070
+          expression: last(/IBM IMM SNMPv3/raid.pd.health[{#PDINDEX}])>=5
+          name: 'Physical disk [{#PDNAME}]: Health FAILED/CRITICAL'
+          priority: HIGH
+          manual_close: 'YES'
+      - uuid: da05e1f819494457b96b2e92fab83d29
+        name: 'Physical disk [{#PDNAME}]: Part number'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.3.1.19.{#PDINDEX}
+        key: raid.pd.partno[{#PDINDEX}]
+        delay: 1h
+        history: 2w
+        value_type: TEXT
+        tags:
+        - tag: Application
+          value: RAID Physical Disks
+      - uuid: b8a59c6e6c5247b8a08a59c99281b448
+        name: 'Physical disk [{#PDNAME}]: State (raw)'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.3.1.4.{#PDINDEX}
+        key: raid.pd.state.raw[{#PDINDEX}]
+        delay: 3m
+        history: 30d
+        value_type: TEXT
+        tags:
+        - tag: Application
+          value: RAID Physical Disks
+      - uuid: d02ac1693c5f43edb272941de4faba3d
+        name: 'Physical disk [{#PDNAME}]: State'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.3.1.4.{#PDINDEX}
+        key: raid.pd.state[{#PDINDEX}]
+        delay: 3m
+        history: 30d
+        trends: 5d
+        description: 'Numeric PD role/state for dashboards: 1=Online, 2=Hot spare, 3=Unconfigured good, 4=Rebuilding, 5=Offline/Failed/Missing, 0=Unknown.'
+        valuemap:
+          name: XCC RAID PD state
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - |
+            var s = (value || '').trim().toLowerCase();
+            if (s === '') return 0;
+            if (s === 'online') return 1;
+            if (s.indexOf('hot') !== -1 && s.indexOf('spare') !== -1) return 2;
+            if (s === 'unconfigured good' || s === 'unconfigured-good') return 3;
+            if (s.indexOf('rebuild') !== -1) return 4;
+            return 5;
+        tags:
+        - tag: Application
+          value: RAID Physical Disks
+        trigger_prototypes:
+        - uuid: 2d8879d1514b4d8489ed4cf9872267b4
+          expression: last(/IBM IMM SNMPv3/raid.pd.state[{#PDINDEX}])>=5
+          name: 'Physical disk [{#PDNAME}]: NOT Online (Offline/Failed/Missing)'
+          priority: HIGH
+          manual_close: 'YES'
+      - uuid: d8a83826ab2c4a19870188292afa16c3
+        name: 'Physical disk {#PDINDEX} ({#PDNAME}): Wear remaining (%)'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.3.1.25.{#PDINDEX}
+        key: raid.pd.wear.pct[{#PDINDEX}]
+        delay: 1h
+        history: 30d
+        value_type: FLOAT
+        units: '%'
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - |
+            var s = (value || '').trim();
+            var m = s.match(/(\d+(?:\.\d+)?)\s*%/);
+            if (m) return parseFloat(m[1]);
+            return null;
+        tags:
+        - tag: Application
+          value: SSD Wear
+        - tag: component
+          value: storage
+        - tag: metric
+          value: wear
+      - uuid: 4aeda9034cdd4e51ad23f7467afefb06
+        name: 'Physical disk [{#PDNAME}]: Wear'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.3.1.25.{#PDINDEX}
+        key: raid.pd.wear[{#PDINDEX}]
+        delay: 1h
+        history: 30d
+        value_type: TEXT
+        tags:
+        - tag: Application
+          value: RAID Physical Disks
+      overrides:
+      - name: Disable SSD wear item for non-SSD drives
+        step: '1'
+        filter:
+          evaltype: AND
+          conditions:
+          - macro: '{#PDTYPE}'
+            value: (?i)(ssd|solid|flash)
+            operator: NOT_MATCHES_REGEX
+        operations:
+        - value: raid.pd.wear.pct[{#PDINDEX}]
+          status: DISABLED
+    - uuid: 7cb89fb028744af59c41e3de49bed4a6
+      name: RAID Volume (Virtual Drive) Discovery (IMM)
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#VDINDEX},1.3.6.1.4.1.2.3.51.3.1.13.1.7.1.1,{#VDNAME},1.3.6.1.4.1.2.3.51.3.1.13.1.7.1.2]
+      key: raid.vd.discovery
+      lifetime: 30d
+      enabled_lifetime_type: DISABLE_NEVER
+      description: Discover RAID virtual drives from IMM-MIB raidVolumeTable.
+      item_prototypes:
+      - uuid: 9615cffd1bf34fbea4a5b65a881bb510
+        name: 'Virtual disk [{#VDNAME}]: Size'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.7.1.5.{#VDINDEX}
+        key: raid.vd.size[{#VDINDEX}]
+        delay: 1h
+        history: 30d
+        value_type: TEXT
+        tags:
+        - tag: Application
+          value: RAID Volumes
+      - uuid: 166707e0bdbc4950b1ee1fa8bd7cdfb5
+        name: 'Virtual disk [{#VDNAME}]: Status (raw)'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.7.1.4.{#VDINDEX}
+        key: raid.vd.status.raw[{#VDINDEX}]
+        delay: 3m
+        history: 30d
+        value_type: TEXT
+        tags:
+        - tag: Application
+          value: RAID Volumes
+      - uuid: 4236c62431eb43e780db1946ebc26ac1
+        name: 'Virtual disk [{#VDNAME}]: Status'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.7.1.4.{#VDINDEX}
+        key: raid.vd.status[{#VDINDEX}]
+        delay: 3m
+        history: 30d
+        trends: 5d
+        valuemap:
+          name: XCC RAID VD status
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - |
+            var s = (value || '').trim().toLowerCase();
+            if (s === '') return 0;
+            if (s === 'optimal') return 1;
+            if (s.indexOf('rebuild') !== -1) return 4;
+            if (s.indexOf('degrad') !== -1) return 3;
+            return 5;
+        tags:
+        - tag: Application
+          value: RAID Volumes
+        trigger_prototypes:
+        - uuid: 68b5d57bc77f4facbd1f7e8eb3747f9a
+          expression: nodata(/IBM IMM SNMPv3/raid.vd.status[{#VDINDEX}],10m)=0 and last(/IBM IMM SNMPv3/raid.vd.status[{#VDINDEX}])=5
+          name: 'Virtual disk [{#VDNAME}]: FAILED/OFFLINE'
+          priority: DISASTER
+          manual_close: 'YES'
+        - uuid: 366ff8e9640d40e8aad2ff8a41e98815
+          expression: nodata(/IBM IMM SNMPv3/raid.vd.status[{#VDINDEX}],10m)=0 and (last(/IBM IMM SNMPv3/raid.vd.status[{#VDINDEX}])=3 or last(/IBM IMM SNMPv3/raid.vd.status[{#VDINDEX}])=4)
+          name: 'Virtual disk [{#VDNAME}]: NOT Optimal (Degraded/Rebuild)'
+          priority: HIGH
+          manual_close: 'YES'
+    - uuid: d28a0a7b477b477d8d5bfd51d665fba4
+      name: RAID Controller discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#CTRLINDEX},1.3.6.1.4.1.2.3.51.3.1.13.1.2.1.1,{#CTRLNAME},1.3.6.1.4.1.2.3.51.3.1.13.1.2.1.2,{#CTRLVER},1.3.6.1.4.1.2.3.51.3.1.13.1.2.1.4]
+      key: raidcontroller
+      lifetime: 30d
+      enabled_lifetime_type: DISABLE_NEVER
+      item_prototypes:
+      - uuid: f3cc2f143b854e6391a4830330957904
+        name: RAID controller battery backup - {#CTRLNAME}
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.2.1.5.{#CTRLINDEX}
+        key: raidctrlbatbck[{#CTRLINDEX}]
+        history: 2d
+        trends: 5d
+        valuemap:
+          name: raid ctrl batbck
+      - uuid: 59bb95fe559c42ab9e9fd8a2dbb75eed
+        name: RAID controller name - {#CTRLNAME}
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.2.1.2.{#CTRLINDEX}
+        key: raidctrlname[{#CTRLINDEX}]
+        history: 2d
+        value_type: TEXT
+      - uuid: 057f3d5a13f34fbf9fb3545f1d627379
+        name: RAID controller version - {#CTRLNAME}
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.2.1.4.{#CTRLINDEX}
+        key: raidctrlver[{#CTRLINDEX}]
+        history: 2d
+        value_type: TEXT
+      - uuid: c684dd1a9b934af2be65b326d4271a83
+        name: RAID controller Model - {#CTRLNAME}
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.2.1.9.{#CTRLINDEX}
+        key: raidctrlvpdmodel[{#CTRLINDEX}]
+        history: 2d
+        value_type: TEXT
+      - uuid: 4719e73c3a174c139c3330d8dbafcf83
+        name: RAID controller Part Number - {#CTRLNAME}
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.2.1.12.{#CTRLINDEX}
+        key: raidctrlvpdpartno[{#CTRLINDEX}]
+        history: 2d
+        value_type: TEXT
+      - uuid: 583f5cb78a2f4a03a31eb06f9b38545d
+        name: RAID controller Serial Number - {#CTRLNAME}
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.2.1.10.{#CTRLINDEX}
+        key: raidctrlvpdsrnum[{#CTRLINDEX}]
+        history: 2d
+        value_type: TEXT
+    - uuid: b0589fe7217b4c3e9990d044984cc17a
+      name: Storage Pool Discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#POOLINDEX},1.3.6.1.4.1.2.3.51.3.1.13.1.6.1.1,{#POOLNAME},1.3.6.1.4.1.2.3.51.3.1.13.1.6.1.2]
+      key: raidstoragepool
+      lifetime: 30d
+      enabled_lifetime_type: DISABLE_NEVER
+      item_prototypes:
+      - uuid: 3722f2d1b127488e9a28c59978df4820
+        name: Storage Pool {#POOLNAME} Capacity
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.6.1.5.{#POOLINDEX}
+        key: raidstoragepoolcapacity[{#POOLINDEX}]
+        history: 2d
+        value_type: TEXT
+      - uuid: 34421384ae1d46b0af2e853381260b81
+        name: Storage Pool {#POOLNAME} Controller Name
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.6.1.3.{#POOLINDEX}
+        key: raidstoragepoolcntrl[{#POOLINDEX}]
+        history: 2d
+        value_type: TEXT
+        tags:
+        - tag: hardware
+          value: storage
+      - uuid: 8bc4d55c2fb34c479d4a7455705a54f7
+        name: Storage Pool {#POOLNAME} Drives
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.6.1.7.{#POOLINDEX}
+        key: raidstoragepooldrives[{#POOLINDEX}]
+        history: 2d
+        value_type: TEXT
+      - uuid: 5bdd35898f6a4f98913ed73bf91043c3
+        name: Storage Pool {#POOLNAME} State
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.6.1.4.{#POOLINDEX}
+        key: raidstoragepoolstat[{#POOLINDEX}]
+        history: 2d
+        value_type: TEXT
+      - uuid: 82886b9d0f1c4c1993c7a07d7a64d3d5
+        name: Storage Pool {#POOLNAME} Volume List
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.13.1.6.1.6.{#POOLINDEX}
+        key: raidstoragepoolvollist[{#POOLINDEX}]
+        history: 2d
+        value_type: TEXT
+    - uuid: 004c393899404e59916f15de308faa97
+      name: Temperature Discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TEMPINDEX},1.3.6.1.4.1.2.3.51.3.1.1.2.1.1,{#TEMP_NAME},1.3.6.1.4.1.2.3.51.3.1.1.2.1.2]
+      key: temp.discovery
+      lifetime: 30d
+      enabled_lifetime_type: DISABLE_NEVER
+      item_prototypes:
+      - uuid: 88b8351437124558ab979846d8e58ae1
+        name: 'Temperature sensor [{#TEMP_NAME}]: Status (raw)'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.1.2.1.11.{#TEMPINDEX}
+        key: sensor.temp.status.raw[{#TEMPINDEX}]
+        history: 30d
+        value_type: TEXT
+        tags:
+        - tag: hardware
+          value: temperature
+      - uuid: d47422092eb940dd97aa4f55244a182f
+        name: 'Temperature sensor [{#TEMP_NAME}]: Status'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.1.2.1.11.{#TEMPINDEX}
+        key: sensor.temp.status[{#TEMPINDEX}]
+        history: 30d
+        valuemap:
+          name: XCC Temperature status
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - |
+            var s = (value || '').trim().toLowerCase();
+            if (s === '' || s === 'unknown' || s === 'n/a' || s === 'na') return 0;
+            if (s === 'normal' || s === 'ok' || s === 'optimal' || s === 'online') return 1;
+            if (s.indexOf('warn') !== -1 || s.indexOf('degrad') !== -1 || s.indexOf('noncritical') !== -1 || s.indexOf('non-critical') !== -1 || s.indexOf('rebuild') !== -1 || s.indexOf('rebuilding') !== -1) return 3;
+            return 5;
+        tags:
+        - tag: hardware
+          value: health
+        - tag: hardware
+          value: temperature
+        trigger_prototypes:
+        - uuid: 0bb8f6a4f1204887a357b968446ac3b2
+          expression: last(/IBM IMM SNMPv3/sensor.temp.status[{#TEMPINDEX}])>=5
+          name: 'Temperature sensor [{#TEMP_NAME}]: CRITICAL/FAILED'
+          priority: HIGH
+          manual_close: 'YES'
+        - uuid: abf96bf7c1024c14870a9b3235cb531a
+          expression: last(/IBM IMM SNMPv3/sensor.temp.status[{#TEMPINDEX}])=3
+          name: 'Temperature sensor [{#TEMP_NAME}]: WARNING/DEGRADED'
+          priority: WARNING
+          manual_close: 'YES'
+      - uuid: 19985a6eb750460ea70e401b330fd2b3
+        name: 'Temperature sensor [{#TEMP_NAME}]: Value'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.1.2.1.3.{#TEMPINDEX}
+        key: sensor.temp.value[{#TEMPINDEX}]
+        history: 30d
+        units: °C
+        tags:
+        - tag: hardware
+          value: temperature
+    - uuid: 2d0c26e0228d427fa459b25810081c51
+      name: Voltage Discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#VOLTINDEX},1.3.6.1.4.1.2.3.51.3.1.2.2.1.1,{#VOLT_NAME},1.3.6.1.4.1.2.3.51.3.1.2.2.1.2]
+      key: volt.discovery
+      lifetime: 30d
+      enabled_lifetime_type: DISABLE_NEVER
+      item_prototypes:
+      - uuid: 187b45ba28064909972c2c9a2c3f6369
+        name: 'Voltage sensor [{#VOLT_NAME}]: Status (raw)'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.2.2.1.11.{#VOLTINDEX}
+        key: sensor.volt.status.raw[{#VOLTINDEX}]
+        history: 30d
+        value_type: TEXT
+        tags:
+        - tag: hardware
+          value: voltage
+      - uuid: e05b573b1f7d420f9496f7243c05e66b
+        name: 'Voltage sensor [{#VOLT_NAME}]: Status'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.2.2.1.11.{#VOLTINDEX}
+        key: sensor.volt.status[{#VOLTINDEX}]
+        history: 30d
+        valuemap:
+          name: XCC Voltage status
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - |
+            var s = (value || '').trim().toLowerCase();
+            if (s === '' || s === 'unknown' || s === 'n/a' || s === 'na') return 0;
+            if (s === 'normal' || s === 'ok' || s === 'optimal' || s === 'online') return 1;
+            if (s.indexOf('warn') !== -1 || s.indexOf('degrad') !== -1 || s.indexOf('noncritical') !== -1 || s.indexOf('non-critical') !== -1 || s.indexOf('rebuild') !== -1 || s.indexOf('rebuilding') !== -1) return 3;
+            return 5;
+        tags:
+        - tag: hardware
+          value: health
+        - tag: hardware
+          value: voltage
+        trigger_prototypes:
+        - uuid: 30d2adbb78fe4654ad7ba10f4e603dd8
+          expression: last(/IBM IMM SNMPv3/sensor.volt.status[{#VOLTINDEX}])>=5
+          name: 'Voltage sensor [{#VOLT_NAME}]: CRITICAL/FAILED'
+          priority: HIGH
+          manual_close: 'YES'
+        - uuid: 2cde679b583843dd80744370c5be086a
+          expression: last(/IBM IMM SNMPv3/sensor.volt.status[{#VOLTINDEX}])=3
+          name: 'Voltage sensor [{#VOLT_NAME}]: WARNING/DEGRADED'
+          priority: WARNING
+          manual_close: 'YES'
+      - uuid: cc0ba29614824d9f91cb98eb40dcd727
+        name: 'Voltage sensor [{#VOLT_NAME}]: Value'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.4.1.2.3.51.3.1.2.2.1.3.{#VOLTINDEX}
+        key: sensor.volt.value[{#VOLTINDEX}]
+        history: 30d
+        value_type: FLOAT
+        units: V
+        preprocessing:
+        - type: MULTIPLIER
+          parameters:
+          - '0.001'
+        tags:
+        - tag: hardware
+          value: voltage
+    dashboards:
+    - uuid: a304a9b53e2c4e99974be819a45ad33f
+      name: Overview
+      pages:
+      - name: Overview
+        display_period: '30'
+        widgets:
+        - type: item
+          name: Power status
+          width: '24'
+          height: '4'
+          fields:
+          - type: STRING
+            name: bg_color
+            value: 2196F3
+          - type: STRING
+            name: description
+            value: Power status
+          - type: STRING
+            name: desc_color
+            value: FFFFFF
+          - type: INTEGER
+            name: desc_v_pos
+            value: '0'
+          - type: ITEM
+            name: itemid.0
+            value:
+              host: IBM IMM SNMPv3
+              key: currentSysPowerStatus
+          - type: INTEGER
+            name: show.0
+            value: '1'
+          - type: INTEGER
+            name: show.1
+            value: '2'
+          - type: STRING
+            name: value_color
+            value: FFFFFF
+          - type: INTEGER
+            name: value_size
+            value: '32'
+        - type: item
+          name: Product name
+          y: '4'
+          width: '36'
+          height: '4'
+          fields:
+          - type: STRING
+            name: bg_color
+            value: 2196F3
+          - type: STRING
+            name: description
+            value: Product name
+          - type: STRING
+            name: desc_color
+            value: FFFFFF
+          - type: INTEGER
+            name: desc_v_pos
+            value: '0'
+          - type: ITEM
+            name: itemid.0
+            value:
+              host: IBM IMM SNMPv3
+              key: machineproductname
+          - type: INTEGER
+            name: show.0
+            value: '1'
+          - type: INTEGER
+            name: show.1
+            value: '2'
+          - type: STRING
+            name: value_color
+            value: FFFFFF
+          - type: INTEGER
+            name: value_size
+            value: '26'
+        - type: item
+          name: Serial number
+          y: '8'
+          width: '36'
+          height: '4'
+          fields:
+          - type: STRING
+            name: bg_color
+            value: 2196F3
+          - type: STRING
+            name: description
+            value: Serial number
+          - type: STRING
+            name: desc_color
+            value: FFFFFF
+          - type: INTEGER
+            name: desc_v_pos
+            value: '0'
+          - type: ITEM
+            name: itemid.0
+            value:
+              host: IBM IMM SNMPv3
+              key: machinesrno
+          - type: INTEGER
+            name: show.0
+            value: '1'
+          - type: INTEGER
+            name: show.1
+            value: '2'
+          - type: STRING
+            name: value_color
+            value: FFFFFF
+          - type: INTEGER
+            name: value_size
+            value: '26'
+        - type: item
+          name: Power in use
+          y: '12'
+          width: '24'
+          height: '4'
+          fields:
+          - type: STRING
+            name: bg_color
+            value: 2196F3
+          - type: STRING
+            name: description
+            value: Power in use
+          - type: STRING
+            name: desc_color
+            value: FFFFFF
+          - type: INTEGER
+            name: desc_v_pos
+            value: '0'
+          - type: ITEM
+            name: itemid.0
+            value:
+              host: IBM IMM SNMPv3
+              key: power.inuse
+          - type: INTEGER
+            name: show.0
+            value: '1'
+          - type: INTEGER
+            name: show.1
+            value: '2'
+          - type: STRING
+            name: value_color
+            value: FFFFFF
+          - type: INTEGER
+            name: value_size
+            value: '34'
+        - type: item
+          name: System health
+          x: '24'
+          width: '24'
+          height: '4'
+          fields:
+          - type: STRING
+            name: bg_color
+            value: 2196F3
+          - type: STRING
+            name: description
+            value: System health
+          - type: STRING
+            name: desc_color
+            value: FFFFFF
+          - type: INTEGER
+            name: desc_v_pos
+            value: '0'
+          - type: ITEM
+            name: itemid.0
+            value:
+              host: IBM IMM SNMPv3
+              key: IMMsystemHealthStat
+          - type: INTEGER
+            name: show.0
+            value: '1'
+          - type: INTEGER
+            name: show.1
+            value: '2'
+          - type: STRING
+            name: value_color
+            value: FFFFFF
+          - type: INTEGER
+            name: value_size
+            value: '32'
+        - type: item
+          name: Power on hours
+          x: '24'
+          y: '12'
+          width: '24'
+          height: '4'
+          fields:
+          - type: STRING
+            name: bg_color
+            value: 2196F3
+          - type: STRING
+            name: description
+            value: Power on hours
+          - type: STRING
+            name: desc_color
+            value: FFFFFF
+          - type: INTEGER
+            name: desc_v_pos
+            value: '0'
+          - type: ITEM
+            name: itemid.0
+            value:
+              host: IBM IMM SNMPv3
+              key: powerOnHours
+          - type: INTEGER
+            name: show.0
+            value: '1'
+          - type: INTEGER
+            name: show.1
+            value: '2'
+          - type: STRING
+            name: value_color
+            value: FFFFFF
+          - type: INTEGER
+            name: value_size
+            value: '28'
+        - type: item
+          name: Machine model
+          x: '36'
+          y: '4'
+          width: '36'
+          height: '4'
+          fields:
+          - type: STRING
+            name: bg_color
+            value: 2196F3
+          - type: STRING
+            name: description
+            value: Machine model
+          - type: STRING
+            name: desc_color
+            value: FFFFFF
+          - type: INTEGER
+            name: desc_v_pos
+            value: '0'
+          - type: ITEM
+            name: itemid.0
+            value:
+              host: IBM IMM SNMPv3
+              key: machinemodel
+          - type: INTEGER
+            name: show.0
+            value: '1'
+          - type: INTEGER
+            name: show.1
+            value: '2'
+          - type: STRING
+            name: value_color
+            value: FFFFFF
+          - type: INTEGER
+            name: value_size
+            value: '26'
+        - type: item
+          name: System UUID
+          x: '36'
+          y: '8'
+          width: '36'
+          height: '4'
+          fields:
+          - type: STRING
+            name: bg_color
+            value: 2196F3
+          - type: STRING
+            name: description
+            value: System UUID
+          - type: STRING
+            name: desc_color
+            value: FFFFFF
+          - type: INTEGER
+            name: desc_v_pos
+            value: '0'
+          - type: ITEM
+            name: itemid.0
+            value:
+              host: IBM IMM SNMPv3
+              key: machineuuid
+          - type: INTEGER
+            name: show.0
+            value: '1'
+          - type: INTEGER
+            name: show.1
+            value: '2'
+          - type: STRING
+            name: value_color
+            value: FFFFFF
+          - type: INTEGER
+            name: value_size
+            value: '18'
+        - type: item
+          name: System state
+          x: '48'
+          width: '24'
+          height: '4'
+          fields:
+          - type: STRING
+            name: bg_color
+            value: 2196F3
+          - type: STRING
+            name: description
+            value: System state
+          - type: STRING
+            name: desc_color
+            value: FFFFFF
+          - type: INTEGER
+            name: desc_v_pos
+            value: '0'
+          - type: ITEM
+            name: itemid.0
+            value:
+              host: IBM IMM SNMPv3
+              key: IMMsystemState
+          - type: INTEGER
+            name: show.0
+            value: '1'
+          - type: INTEGER
+            name: show.1
+            value: '2'
+          - type: STRING
+            name: value_color
+            value: FFFFFF
+          - type: INTEGER
+            name: value_size
+            value: '32'
+        - type: item
+          name: Restart count
+          x: '48'
+          y: '12'
+          width: '24'
+          height: '4'
+          fields:
+          - type: STRING
+            name: bg_color
+            value: 2196F3
+          - type: STRING
+            name: description
+            value: Restart count
+          - type: STRING
+            name: desc_color
+            value: FFFFFF
+          - type: INTEGER
+            name: desc_v_pos
+            value: '0'
+          - type: ITEM
+            name: itemid.0
+            value:
+              host: IBM IMM SNMPv3
+              key: IMMrestartCount
+          - type: INTEGER
+            name: show.0
+            value: '1'
+          - type: INTEGER
+            name: show.1
+            value: '2'
+          - type: STRING
+            name: value_color
+            value: FFFFFF
+          - type: INTEGER
+            name: value_size
+            value: '34'
+      - name: Discoveries
+        display_period: '30'
+        widgets:
+        - type: honeycomb
+          name: Fans
+          width: '24'
+          height: '4'
+          fields:
+          - type: STRING
+            name: items.0
+            value: 'Fan *: Status'
+          - type: STRING
+            name: primary_label
+            value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+          - type: INTEGER
+            name: primary_label_size_type
+            value: '1'
+          - type: STRING
+            name: reference
+            value: IMMA1
+          - type: STRING
+            name: thresholds.0.color
+            value: 9E9E9E
+          - type: STRING
+            name: thresholds.0.threshold
+            value: '0'
+          - type: STRING
+            name: thresholds.1.color
+            value: 069C56
+          - type: STRING
+            name: thresholds.1.threshold
+            value: '1'
+          - type: STRING
+            name: thresholds.2.color
+            value: BDBDBD
+          - type: STRING
+            name: thresholds.2.threshold
+            value: '2'
+          - type: STRING
+            name: thresholds.3.color
+            value: D3212C
+          - type: STRING
+            name: thresholds.3.threshold
+            value: '5'
+        - type: honeycomb
+          name: Temperature sensors
+          y: '4'
+          width: '24'
+          height: '4'
+          fields:
+          - type: STRING
+            name: items.0
+            value: 'Temperature sensor *: Status'
+          - type: STRING
+            name: primary_label
+            value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+          - type: INTEGER
+            name: primary_label_size_type
+            value: '1'
+          - type: STRING
+            name: reference
+            value: IMMA4
+          - type: STRING
+            name: thresholds.0.color
+            value: 9E9E9E
+          - type: STRING
+            name: thresholds.0.threshold
+            value: '0'
+          - type: STRING
+            name: thresholds.1.color
+            value: 069C56
+          - type: STRING
+            name: thresholds.1.threshold
+            value: '1'
+          - type: STRING
+            name: thresholds.2.color
+            value: FF980E
+          - type: STRING
+            name: thresholds.2.threshold
+            value: '3'
+          - type: STRING
+            name: thresholds.3.color
+            value: D3212C
+          - type: STRING
+            name: thresholds.3.threshold
+            value: '5'
+        - type: honeycomb
+          name: Memory modules
+          y: '8'
+          width: '36'
+          height: '4'
+          fields:
+          - type: STRING
+            name: items.0
+            value: 'Memory module *: Status'
+          - type: STRING
+            name: primary_label
+            value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+          - type: INTEGER
+            name: primary_label_size_type
+            value: '1'
+          - type: STRING
+            name: reference
+            value: IMMA7
+          - type: STRING
+            name: thresholds.0.color
+            value: 9E9E9E
+          - type: STRING
+            name: thresholds.0.threshold
+            value: '0'
+          - type: STRING
+            name: thresholds.1.color
+            value: 069C56
+          - type: STRING
+            name: thresholds.1.threshold
+            value: '1'
+          - type: STRING
+            name: thresholds.2.color
+            value: FF980E
+          - type: STRING
+            name: thresholds.2.threshold
+            value: '3'
+          - type: STRING
+            name: thresholds.3.color
+            value: D3212C
+          - type: STRING
+            name: thresholds.3.threshold
+            value: '5'
+        - type: honeycomb
+          name: Physical disks (Health)
+          y: '12'
+          width: '36'
+          height: '4'
+          fields:
+          - type: STRING
+            name: items.0
+            value: 'Physical disk *: Health'
+          - type: STRING
+            name: primary_label
+            value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+          - type: INTEGER
+            name: primary_label_size_type
+            value: '1'
+          - type: STRING
+            name: reference
+            value: IMMB1
+          - type: STRING
+            name: thresholds.0.color
+            value: 9E9E9E
+          - type: STRING
+            name: thresholds.0.threshold
+            value: '0'
+          - type: STRING
+            name: thresholds.1.color
+            value: 069C56
+          - type: STRING
+            name: thresholds.1.threshold
+            value: '1'
+          - type: STRING
+            name: thresholds.2.color
+            value: FF980E
+          - type: STRING
+            name: thresholds.2.threshold
+            value: '3'
+          - type: STRING
+            name: thresholds.3.color
+            value: D3212C
+          - type: STRING
+            name: thresholds.3.threshold
+            value: '5'
+        - type: honeycomb
+          name: SSD wear remaining
+          y: '16'
+          width: '72'
+          height: '4'
+          fields:
+          - type: STRING
+            name: items.0
+            value: 'Physical disk *: Wear remaining (%)'
+          - type: STRING
+            name: primary_label
+            value: '{{ITEM.NAME}.regsub("^Physical disk ([0-9]+) \((.*?)\): Wear remaining \(%%\)$", "\2")}'
+          - type: INTEGER
+            name: primary_label_size_type
+            value: '1'
+          - type: STRING
+            name: reference
+            value: IMMB3
+          - type: STRING
+            name: thresholds.0.color
+            value: D3212C
+          - type: STRING
+            name: thresholds.0.threshold
+            value: '0'
+          - type: STRING
+            name: thresholds.1.color
+            value: FEC400
+          - type: STRING
+            name: thresholds.1.threshold
+            value: '30'
+          - type: STRING
+            name: thresholds.2.color
+            value: 069C56
+          - type: STRING
+            name: thresholds.2.threshold
+            value: '40'
+        - type: honeycomb
+          name: Voltage sensors
+          x: '24'
+          width: '24'
+          height: '4'
+          fields:
+          - type: STRING
+            name: items.0
+            value: 'Voltage sensor *: Status'
+          - type: STRING
+            name: primary_label
+            value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+          - type: INTEGER
+            name: primary_label_size_type
+            value: '1'
+          - type: STRING
+            name: reference
+            value: IMMA5
+          - type: STRING
+            name: thresholds.0.color
+            value: 9E9E9E
+          - type: STRING
+            name: thresholds.0.threshold
+            value: '0'
+          - type: STRING
+            name: thresholds.1.color
+            value: 069C56
+          - type: STRING
+            name: thresholds.1.threshold
+            value: '1'
+          - type: STRING
+            name: thresholds.2.color
+            value: FF980E
+          - type: STRING
+            name: thresholds.2.threshold
+            value: '3'
+          - type: STRING
+            name: thresholds.3.color
+            value: D3212C
+          - type: STRING
+            name: thresholds.3.threshold
+            value: '5'
+        - type: honeycomb
+          name: CPUs
+          x: '24'
+          y: '4'
+          width: '24'
+          height: '4'
+          fields:
+          - type: STRING
+            name: items.0
+            value: 'CPU *: Status'
+          - type: STRING
+            name: primary_label
+            value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+          - type: INTEGER
+            name: primary_label_size_type
+            value: '1'
+          - type: STRING
+            name: reference
+            value: IMMA6
+          - type: STRING
+            name: thresholds.0.color
+            value: 9E9E9E
+          - type: STRING
+            name: thresholds.0.threshold
+            value: '0'
+          - type: STRING
+            name: thresholds.1.color
+            value: 069C56
+          - type: STRING
+            name: thresholds.1.threshold
+            value: '1'
+          - type: STRING
+            name: thresholds.2.color
+            value: FF980E
+          - type: STRING
+            name: thresholds.2.threshold
+            value: '3'
+          - type: STRING
+            name: thresholds.3.color
+            value: D3212C
+          - type: STRING
+            name: thresholds.3.threshold
+            value: '5'
+        - type: honeycomb
+          name: Physical disks (State)
+          x: '36'
+          y: '8'
+          width: '36'
+          height: '4'
+          fields:
+          - type: STRING
+            name: items.0
+            value: 'Physical disk *: State'
+          - type: STRING
+            name: primary_label
+            value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+          - type: INTEGER
+            name: primary_label_size_type
+            value: '1'
+          - type: STRING
+            name: reference
+            value: IMMA9
+          - type: STRING
+            name: thresholds.0.color
+            value: 9E9E9E
+          - type: STRING
+            name: thresholds.0.threshold
+            value: '0'
+          - type: STRING
+            name: thresholds.1.color
+            value: 069C56
+          - type: STRING
+            name: thresholds.1.threshold
+            value: '1'
+          - type: STRING
+            name: thresholds.2.color
+            value: 1E88E5
+          - type: STRING
+            name: thresholds.2.threshold
+            value: '2'
+          - type: STRING
+            name: thresholds.3.color
+            value: FF980E
+          - type: STRING
+            name: thresholds.3.threshold
+            value: '4'
+          - type: STRING
+            name: thresholds.4.color
+            value: D3212C
+          - type: STRING
+            name: thresholds.4.threshold
+            value: '5'
+        - type: honeycomb
+          name: Virtual disks
+          x: '36'
+          y: '12'
+          width: '36'
+          height: '4'
+          fields:
+          - type: STRING
+            name: items.0
+            value: 'Virtual disk *: Status'
+          - type: STRING
+            name: primary_label
+            value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+          - type: INTEGER
+            name: primary_label_size_type
+            value: '1'
+          - type: STRING
+            name: reference
+            value: IMMB2
+          - type: STRING
+            name: thresholds.0.color
+            value: 9E9E9E
+          - type: STRING
+            name: thresholds.0.threshold
+            value: '0'
+          - type: STRING
+            name: thresholds.1.color
+            value: 069C56
+          - type: STRING
+            name: thresholds.1.threshold
+            value: '1'
+          - type: STRING
+            name: thresholds.2.color
+            value: FF980E
+          - type: STRING
+            name: thresholds.2.threshold
+            value: '3'
+          - type: STRING
+            name: thresholds.3.color
+            value: D3212C
+          - type: STRING
+            name: thresholds.3.threshold
+            value: '5'
+        - type: honeycomb
+          name: Power supplies
+          x: '48'
+          width: '24'
+          height: '4'
+          fields:
+          - type: STRING
+            name: items.0
+            value: 'Power supply *: Status'
+          - type: STRING
+            name: primary_label
+            value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+          - type: INTEGER
+            name: primary_label_size_type
+            value: '1'
+          - type: STRING
+            name: reference
+            value: IMMA2
+          - type: STRING
+            name: thresholds.0.color
+            value: 9E9E9E
+          - type: STRING
+            name: thresholds.0.threshold
+            value: '0'
+          - type: STRING
+            name: thresholds.1.color
+            value: 069C56
+          - type: STRING
+            name: thresholds.1.threshold
+            value: '1'
+          - type: STRING
+            name: thresholds.2.color
+            value: FF980E
+          - type: STRING
+            name: thresholds.2.threshold
+            value: '3'
+          - type: STRING
+            name: thresholds.3.color
+            value: D3212C
+          - type: STRING
+            name: thresholds.3.threshold
+            value: '5'
+        - type: honeycomb
+          name: Disk modules
+          x: '48'
+          y: '4'
+          width: '23'
+          height: '4'
+          fields:
+          - type: STRING
+            name: items.0
+            value: 'Disk module *: Status'
+          - type: STRING
+            name: primary_label
+            value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+          - type: INTEGER
+            name: primary_label_size_type
+            value: '1'
+          - type: STRING
+            name: reference
+            value: IMMA8
+          - type: STRING
+            name: thresholds.0.color
+            value: 9E9E9E
+          - type: STRING
+            name: thresholds.0.threshold
+            value: '0'
+          - type: STRING
+            name: thresholds.1.color
+            value: 069C56
+          - type: STRING
+            name: thresholds.1.threshold
+            value: '1'
+          - type: STRING
+            name: thresholds.2.color
+            value: FF980E
+          - type: STRING
+            name: thresholds.2.threshold
+            value: '3'
+          - type: STRING
+            name: thresholds.3.color
+            value: D3212C
+          - type: STRING
+            name: thresholds.3.threshold
+            value: '5'
+    valuemaps:
+    - uuid: 7b37dd693fd54fe1a482cab9025be14c
+      name: currentSysPowerStatus
+      mappings:
+      - value: '0'
+        newvalue: poweredOff
+      - value: '1'
+        newvalue: sleepS3
+      - value: '255'
+        newvalue: poweredOn
+    - uuid: 4bc5e9349e5e4dc2af0787396a887b98
+      name: IMM-MIB::systemHealthStat
+      mappings:
+      - value: '0'
+        newvalue: nonRecoverable
+      - value: '2'
+        newvalue: critical
+      - value: '4'
+        newvalue: nonCritical
+      - value: '255'
+        newvalue: ok
+    - uuid: f33665ac840a45a3b494e794f5bfd772
+      name: ledstate
+      mappings:
+      - value: '0'
+        newvalue: 'off'
+      - value: '1'
+        newvalue: 'on'
+      - value: '2'
+        newvalue: blinking
+      - value: '3'
+        newvalue: notAvailable
+    - uuid: defd0f311791423688100eb34a38587d
+      name: raid ctrl batbck
+      mappings:
+      - value: '0'
+        newvalue: uninstalled
+      - value: '1'
+        newvalue: installed
+      - value: '2'
+        newvalue: unknown
+    - uuid: ec79c690b3ad48e9b4caa556058c66fc
+      name: raidoobcapable
+      mappings:
+      - value: '0'
+        newvalue: disabled
+      - value: '1'
+        newvalue: enabled
+    - uuid: 939e7512f1ff4757bec630fa51115c75
+      name: systemState
+      mappings:
+      - value: '0'
+        newvalue: systemPowerOfforStateUnknown
+      - value: '1'
+        newvalue: systemPowerOnorStartingUEFI
+      - value: '2'
+        newvalue: systemInUEFI
+      - value: '3'
+        newvalue: uEFIErrorDetected
+      - value: '4'
+        newvalue: bootingOSorInUnsupportedOS
+      - value: '5'
+        newvalue: oSBooted
+      - value: '6'
+        newvalue: suspendToRAM
+      - value: '7'
+        newvalue: systemInSetup
+      - value: '8'
+        newvalue: systemInLXPMMaintenanceMode
+      - value: '9'
+        newvalue: systemInMemoryTest
+    - uuid: 797e6504e9454a66a98da67ff4eba20d
+      name: XCC CPU status
+      mappings:
+      - value: '0'
+        newvalue: unknown
+      - value: '1'
+        newvalue: ok
+      - value: '3'
+        newvalue: nonCritical
+      - value: '5'
+        newvalue: critical
+    - uuid: f464aeefae1549b68d5f9e0ee9661fa8
+      name: XCC Disk status
+      mappings:
+      - value: '0'
+        newvalue: unknown
+      - value: '1'
+        newvalue: ok
+      - value: '3'
+        newvalue: nonCritical
+      - value: '5'
+        newvalue: critical
+    - uuid: 7a04c21de03f4c91a3f41c961570b942
+      name: XCC Fan status
+      mappings:
+      - value: '0'
+        newvalue: unknown
+      - value: '1'
+        newvalue: ok
+      - value: '2'
+        newvalue: unknown
+      - value: '5'
+        newvalue: critical
+      - value: '4'
+        newvalue: notInstalled
+    - uuid: 886d1bceb7bd48d9be3a2ca6720f6ce5
+      name: XCC Memory status
+      mappings:
+      - value: '0'
+        newvalue: unknown
+      - value: '1'
+        newvalue: ok
+      - value: '3'
+        newvalue: nonCritical
+      - value: '5'
+        newvalue: critical
+    - uuid: 0012ae3076bf42b996c4791448cb05cc
+      name: XCC PSU status
+      mappings:
+      - value: '0'
+        newvalue: unknown
+      - value: '1'
+        newvalue: ok
+      - value: '3'
+        newvalue: nonCritical
+      - value: '5'
+        newvalue: critical
+    - uuid: 0d62e78688bd4052ac21d81934b98bf3
+      name: XCC RAID PD health
+      mappings:
+      - value: '0'
+        newvalue: unknown
+      - value: '1'
+        newvalue: ok
+      - value: '3'
+        newvalue: nonCritical
+      - value: '5'
+        newvalue: critical
+    - uuid: fad7cbd00d0e446bb4b088b123089984
+      name: XCC RAID PD state
+      mappings:
+      - value: '0'
+        newvalue: unknown
+      - value: '1'
+        newvalue: Online
+      - value: '2'
+        newvalue: Hot spare
+      - value: '3'
+        newvalue: Unconfigured good
+      - value: '4'
+        newvalue: Rebuilding
+      - value: '5'
+        newvalue: Offline/Failed/Missing
+    - uuid: 87d14216d0c44061b2f76223ffa2c791
+      name: XCC RAID VD status
+      mappings:
+      - value: '0'
+        newvalue: unknown
+      - value: '1'
+        newvalue: Online
+      - value: '3'
+        newvalue: Degraded
+      - value: '4'
+        newvalue: Rebuilding
+      - value: '5'
+        newvalue: Failed
+    - uuid: abdae3123c60401aae1086e9826f8c67
+      name: XCC Temperature status
+      mappings:
+      - value: '0'
+        newvalue: unknown
+      - value: '1'
+        newvalue: ok
+      - value: '3'
+        newvalue: nonCritical
+      - value: '5'
+        newvalue: critical
+    - uuid: 8caa3f18b4694203a08c7dae0300d191
+      name: XCC Voltage status
+      mappings:
+      - value: '0'
+        newvalue: unknown
+      - value: '1'
+        newvalue: ok
+      - value: '3'
+        newvalue: nonCritical
+      - value: '5'
+        newvalue: critical

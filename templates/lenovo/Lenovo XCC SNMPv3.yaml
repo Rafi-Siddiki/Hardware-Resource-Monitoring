@@ -1,0 +1,1452 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 0f609231b71d482688fa67d37d9b3328
+      name: 'Templates/Servers Hardware'
+  templates:
+    - uuid: 6c2534a531744910938a4d2b573600b7
+      template: 'Lenovo XCC SNMPv3'
+      name: 'Lenovo XCC SNMPv3'
+      description: |
+        Unified Lenovo XCC SNMPv3 template (God Mode Dashboards).
+        Includes:
+          - Hardware + PSU + Fan + Memory + CPU + Firmware + LED discoveries
+          - RAID PD/VD discoveries with numeric OK items (for Honeycomb)
+          - RAID RAW text item prototypes (state/health/status) to avoid needing a second template
+      vendor:
+        name: Custom
+        version: 7.0-6-unified
+      groups:
+        - name: 'Templates/Servers Hardware'
+      items:
+        - uuid: 96a2c78c5bfa47bf8a7ea239791832ff
+          name: 'Power Status'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.19046.11.1.5.1.1.0
+          key: currentSysPowerStatus
+          history: 2d
+          trends: 5d
+          valuemap:
+            name: currentSysPowerStatus
+        - uuid: 96f8b1c175ef46ceb4e6ff67b5e86280
+          name: 'Fan Total Installed'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.19046.11.1.1.3.1.0
+          key: fan.total
+          history: 2d
+          trends: 5d
+        - uuid: cb1d5e9f271e4fca9eae3e0f1ed5e0d7
+          name: 'Current System PowerStatus'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.19046.11.1.5.1.1.0
+          key: IMMcurrentSysPowerStatus
+          delay: '300'
+          history: 2d
+          trends: 5d
+          valuemap:
+            name: 'IMM-MIB::systemHealthStat'
+        - uuid: b1d30d1931a44a6d9baf45792d19715d
+          name: 'System State'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.19046.11.1.5.1.4.0
+          key: IMMsystemState
+          delay: '300'
+          history: 2d
+          trends: 5d
+          valuemap:
+            name: systemState
+        - uuid: 882191ec797a4c0da8db242a5120cb35
+          name: 'Machine Model'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.19046.11.1.1.5.2.1.2.0
+          key: machinemodel
+          delay: 1h
+          history: 2d
+          value_type: TEXT
+          tags:
+            - tag: Application
+              value: hardware
+        - uuid: e65f9b45f79c424182111c6532a9f792
+          name: 'Machine Name'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.19046.11.1.1.5.2.1.5.0
+          key: machinename
+          delay: 1h
+          history: 2d
+          value_type: TEXT
+          tags:
+            - tag: Application
+              value: hardware
+        - uuid: 8ea7d8ba65294108b6ac794ca2d370b5
+          name: 'Machine Serial Number'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.19046.11.1.1.5.2.1.3.0
+          key: machinesrno
+          delay: 1h
+          history: 2d
+          value_type: TEXT
+          tags:
+            - tag: Application
+              value: hardware
+        - uuid: 2a166c480a8044619342c3fe0f499ee6
+          name: 'Machine Type'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.19046.11.1.1.5.2.1.1.0
+          key: machinetype
+          delay: 1h
+          history: 2d
+          value_type: TEXT
+          tags:
+            - tag: Application
+              value: hardware
+        - uuid: 95c5aca17fa940ffa1fc09155d2e798b
+          name: 'Total power in use'
+          type: SNMP_AGENT
+          snmp_oid: 'LENOVO-XCC-MIB::fuelGaugeTotalPowerInUse.0'
+          key: power.inuse
+          delay: 120s
+          history: 7d
+          units: W
+        - uuid: 030a29b2e3ce45cdb14d565f13dcbecc
+          name: 'Power On Hours'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.19046.11.1.5.1.2.0
+          key: powerOnHours
+          history: 2d
+          trends: 5d
+          units: uptime
+        - uuid: 3214bd7f52304db9b94b84aded713326
+          name: 'RAID ODBC Capable'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.19046.11.1.1.13.1.1.0
+          key: raidoobcapable
+          history: 2d
+          trends: 5d
+          description: 'If raidOOBCapable is disabled, all the RAID information is not available.'
+          valuemap:
+            name: raidoobcapable
+        - uuid: a6c62ffc8426473aa97e4e5a99d8e43d
+          name: Trap
+          type: SNMP_TRAP
+          key: 'snmptrap["General"]'
+          history: 90d
+          value_type: LOG
+          logtimefmt: 'hh:mm:ss yyyy/MM/dd'
+          tags:
+            - tag: Application
+              value: Status
+        - uuid: 32b09c0aa022465ba5d5355fbbf6830c
+          name: 'Restart Count'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.19046.11.1.5.1.3.0
+          key: XCCrestartCount
+          history: 2d
+          trends: 5d
+      discovery_rules:
+        - uuid: 30f0d0edd5c140e4ab45946b5c5f21d3
+          name: 'Fan Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#FANINDEX},1.3.6.1.4.1.19046.11.1.1.3.2.1.1]'
+          key: fan.discovery
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          item_prototypes:
+            - uuid: 2375665078824f76893597040f4cbf5e
+              name: 'Fan [{#FANINDEX}]: Status'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.3.2.1.10.{#FANINDEX}'
+              key: 'fanhealth[{#FANINDEX}]'
+              history: 2d
+              description: 'A description of the fan component status.'
+              valuemap:
+                name: 'XCC Fan status'
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var s = (value || '').trim().toLowerCase();
+                      
+                      // Not installed / absent fans often report "Unknown" in XCC SNMP tables
+                      if (s === '' || s === 'unknown' || s === 'not installed' || s === 'not present' || s === 'absent' || s === 'n/a' || s === 'na') {
+                        return 2; // Not installed
+                      }
+                      
+                      if (s === 'normal' || s === 'ok') {
+                        return 1; // Normal
+                      }
+                      
+                      return 5; // Failed / degraded / any other non-normal state
+              tags:
+                - tag: hardware
+                  value: fan
+                - tag: hardware
+                  value: health
+              trigger_prototypes:
+                - uuid: 71fa15912c30459f8f2e1aaedd687484
+                  expression: 'last(/Lenovo XCC SNMPv3/fanhealth[{#FANINDEX}])>=5'
+                  name: 'Fan [{#FANINDEX}]: FAILED/DEGRADED'
+                  priority: HIGH
+                  manual_close: 'YES'
+            - uuid: d4d558c7ed154ef0bf901d0667591265
+              name: 'Fan [{#FANINDEX}]: Speed'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.3.2.1.3.{#FANINDEX}'
+              key: 'fanspeed[{#FANINDEX}]'
+              history: 2d
+              value_type: TEXT
+              description: 'Fan speed.'
+              tags:
+                - tag: hardware
+                  value: fan
+            - uuid: f222488596af4f86bb241c916c7c362b
+              name: 'Fan [{#FANINDEX}]: Description'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.3.2.1.2.{#FANINDEX}'
+              key: 'fan[{#FANINDEX}]'
+              history: 2d
+              value_type: TEXT
+              tags:
+                - tag: hardware
+                  value: fan
+        - uuid: 0110f8bba9dd4ed382326a2bbce101a2
+          name: 'Firmware Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#FIRMINDEX},1.3.6.1.4.1.19046.11.1.1.5.1.1.1,{#FIRMTYPE},1.3.6.1.4.1.19046.11.1.1.5.1.1.2]'
+          key: firmwarediscovery
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          item_prototypes:
+            - uuid: d2791b4937754f75be0ff0a7b48e64b2
+              name: 'Release Date: {#FIRMTYPE}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.5.1.1.4.{#FIRMINDEX}'
+              key: 'reldate[{#FIRMINDEX}]'
+              history: 90d
+              value_type: TEXT
+              tags:
+                - tag: Application
+                  value: Firmware
+            - uuid: 7b8bea07b1ae47bd9fd275cedd94a2dd
+              name: 'Version: {#FIRMTYPE}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.5.1.1.3.{#FIRMINDEX}'
+              key: 'version[{#FIRMINDEX}]'
+              history: 90d
+              value_type: TEXT
+              tags:
+                - tag: Application
+                  value: Firmware
+        - uuid: d6811a3b06304ff78fe7c2caaa847439
+          name: 'LED Status Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#LEDINDEX},1.3.6.1.4.1.19046.11.1.1.8.2.1.1,{#LEDLABEL},1.3.6.1.4.1.19046.11.1.1.8.2.1.4]'
+          key: leddiscovery
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          item_prototypes:
+            - uuid: 9ac40e37696844e89f93080eaed61c58
+              name: 'LED Color: {#LEDLABEL}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.8.2.1.6.{#LEDINDEX}'
+              key: 'ledcolor[{#LEDINDEX}]'
+              history: 2d
+              value_type: TEXT
+            - uuid: 8816bdbd845f4d2ebd336ea61918374a
+              name: 'LED State: {#LEDLABEL}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.8.2.1.5.{#LEDINDEX}'
+              key: 'ledstate[{#LEDINDEX}]'
+              history: 2d
+              trends: 5d
+              valuemap:
+                name: ledstate
+        - uuid: bf3327737d6845d6b40061fe667330c2
+          name: 'Memory module Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#MEMINDEX},1.3.6.1.4.1.19046.11.1.1.5.21.1.1,{#MEMDISC},1.3.6.1.4.1.19046.11.1.1.5.21.1.2,{#MEMTYPE},1.3.6.1.4.1.19046.11.1.1.5.21.1.6]'
+          key: memorydiscovery
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          item_prototypes:
+            - uuid: f7e30266c79041bca2f2a2979146fd71
+              name: 'Memory module [{#MEMDISC}]: Part number'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.5.21.1.11.{#MEMINDEX}'
+              key: 'mempartno[{#MEMINDEX}]'
+              history: 2d
+              value_type: TEXT
+              tags:
+                - tag: hardware
+                  value: memory
+            - uuid: b5089d94c83e4a21a594fc106ffcf136
+              name: 'Memory module [{#MEMDISC}]: Serial'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.5.21.1.4.{#MEMINDEX}'
+              key: 'memserial[{#MEMINDEX}]'
+              history: 2d
+              value_type: TEXT
+              tags:
+                - tag: hardware
+                  value: memory
+            - uuid: ed004f1dd8584171843d763cd54ad4db
+              name: 'Memory module [{#MEMDISC}]: Size'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.5.21.1.7.{#MEMINDEX}'
+              key: 'memsize[{#MEMINDEX}]'
+              history: 2d
+              trends: 5d
+              units: '!GB'
+              tags:
+                - tag: hardware
+                  value: memory
+            - uuid: 49f837e86c4c49e697fe58de16426ad2
+              name: 'Memory module [{#MEMDISC}]: Speed'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.5.21.1.9.{#MEMINDEX}'
+              key: 'memspeed[{#MEMINDEX}]'
+              history: 2d
+              trends: 5d
+              units: '!MHz'
+              tags:
+                - tag: hardware
+                  value: memory
+            - uuid: ca82e443a55342b9bfca5c715bc72c0b
+              name: 'Memory module [{#MEMDISC}]: Status (raw)'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.5.21.1.8.{#MEMINDEX}'
+              key: 'memstatus.raw[{#MEMINDEX}]'
+              history: 30d
+              value_type: TEXT
+              tags:
+                - tag: hardware
+                  value: memory
+            - uuid: a7864055468d4baf93ed5f6eab65ec38
+              name: 'Memory module [{#MEMDISC}]: Status'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.5.21.1.8.{#MEMINDEX}'
+              key: 'memstatus[{#MEMINDEX}]'
+              history: 2d
+              valuemap:
+                name: 'XCC Memory status'
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var s = (value || '').trim().toLowerCase();
+                      if (s === '') return 0;
+                      if (s === 'normal') return 1;
+                      // Some XCC firmwares keep status 'Normal' even when DIMM is disabled.
+                      // If XCC returns any explicit warning/degraded/disabled text, treat as Warning.
+                      if (s.includes('warn') || s.includes('degrad') || s.includes('disable') || s.includes('error')) return 3;
+                      return 5;
+              tags:
+                - tag: hardware
+                  value: memory
+              trigger_prototypes:
+                - uuid: dd5e936e770b4dd39a45374c031a7161
+                  expression: 'last(/Lenovo XCC SNMPv3/memstatus[{#MEMINDEX}])>=5'
+                  name: 'Memory module [{#MEMDISC}]: FAILED/DEGRADED'
+                  priority: HIGH
+                  manual_close: 'YES'
+        - uuid: 08fb31caf1304c2dac559dfb1c992d43
+          name: 'Network card Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#NETINDEX},1.3.6.1.4.1.19046.11.1.1.14.4.1.1,{#NETNAME},1.3.6.1.4.1.19046.11.1.1.14.4.1.2]'
+          key: network.card
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discover Ethernet cards.'
+          item_prototypes:
+            - uuid: 8c34cd0f2aaa4ef2ab039f6dcde9e5bb
+              name: 'Network Adapter Link speed: {#NETNAME}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.14.4.1.21.{#NETINDEX}'
+              key: 'adapterlinkspeed[{#NETINDEX}]'
+              history: 2d
+              value_type: TEXT
+              tags:
+                - tag: type
+                  value: network
+            - uuid: f50c8381245e412eb824d96ce4348a5f
+              name: 'Network Adapter Link status: {#NETNAME}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.14.4.1.20.{#NETINDEX}'
+              key: 'adapterlinkstatus[{#NETINDEX}]'
+              history: 2d
+              value_type: TEXT
+              tags:
+                - tag: type
+                  value: network
+            - uuid: 718837c4b54a4335833f2f0a7799eb24
+              name: 'Network Adapter: {#NETNAME}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.14.4.1.4.{#NETINDEX}'
+              key: 'adapterstatus[{#NETINDEX}]'
+              history: 2d
+              value_type: TEXT
+              tags:
+                - tag: type
+                  value: network
+        - uuid: 1b927fceba8d4bbeab9b5438c2a8a4a8
+          name: 'Processor Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#CPUINDEX},1.3.6.1.4.1.19046.11.1.1.5.20.1.1,{#CPUMODEL},1.3.6.1.4.1.19046.11.1.1.5.20.1.12]'
+          key: processor.discovery
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          item_prototypes:
+            - uuid: 1bf88e5b05b74b67b394a7102b68df8f
+              name: 'CPU Core:{#CPUINDEX} {#CPUMODEL}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.5.20.1.7.{#CPUINDEX}'
+              key: 'cpucore[{#CPUINDEX}]'
+              history: 2d
+              value_type: TEXT
+              tags:
+                - tag: hardware
+                  value: processor
+            - uuid: a2bda2996f984766b25c718529692def
+              name: 'CPU:{#CPUINDEX} {#CPUMODEL}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.5.20.1.11.{#CPUINDEX}'
+              key: 'cpustatus[{#CPUINDEX}]'
+              history: 2d
+              value_type: TEXT
+              tags:
+                - tag: hardware
+                  value: processor
+        - uuid: 2f248e19f10346a2825e108ee0918bc0
+          name: 'PSU Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#PSU_DESCR},.1.3.6.1.4.1.19046.11.1.1.11.2.1.2]'
+          key: psu.discovery
+          delay: 1h
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          item_prototypes:
+            - uuid: d5b151ff652b4015a798611d25386fc2
+              name: 'Power supply [{#PSU_DESCR}]: Status'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.11.2.1.6.{#SNMPINDEX}'
+              key: 'sensor.psu.status[powerHealthStatus.{#SNMPINDEX}]'
+              delay: 3m
+              history: 2w
+              valuemap:
+                name: 'XCC PSU status'
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var s = (value || '').trim().toLowerCase();
+                      if (s === '') return 0;
+                      if (s === 'normal') return 1;
+                      return 5;
+              tags:
+                - tag: Application
+                  value: 'Power Supply'
+              trigger_prototypes:
+                - uuid: a784bdeb29614d33aeaf82d79ba2ac47
+                  expression: 'last(/Lenovo XCC SNMPv3/sensor.psu.status[powerHealthStatus.{#SNMPINDEX}])>=5'
+                  name: 'Power supply [{#PSU_DESCR}]: FAILED'
+                  priority: HIGH
+        - uuid: 3300f20e38104a9a989a16effb15b0bd
+          name: 'RAID Physical Drive Discovery (XCC)'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#PDNAME},1.3.6.1.4.1.19046.11.1.1.13.1.3.1.2,{#PDTYPE},1.3.6.1.4.1.19046.11.1.1.13.1.3.1.8]'
+          key: raid.pd.discovery
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discover RAID Physical Drives from LENOVO-XCC-MIB raidDriveTable (…13.1.3).'
+          item_prototypes:
+            - uuid: 4c7d2f9f0f7e4a9c8e7d1f5b9d0a6666
+              name: 'Physical disk [{#PDNAME}]: Capacity'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.3.1.12.{#SNMPINDEX}'
+              key: 'raid.pd.capacity[{#SNMPINDEX}]'
+              delay: 1h
+              history: 30d
+              value_type: TEXT
+              tags:
+                - tag: Application
+                  value: 'RAID Physical Disks'
+            - uuid: 5c7d2f9f0f7e4a9c8e7d1f5b9d0a9999
+              name: 'Physical disk [{#PDNAME}]: Health (raw)'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.3.1.11.{#SNMPINDEX}'
+              key: 'raid.pd.health.raw[{#SNMPINDEX}]'
+              delay: 3m
+              history: 30d
+              value_type: TEXT
+              tags:
+                - tag: Application
+                  value: 'RAID Physical Disks'
+            - uuid: 4c7d2f9f0f7e4a9c8e7d1f5b9d0a2222
+              name: 'Physical disk [{#PDNAME}]: Health'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.3.1.11.{#SNMPINDEX}'
+              key: 'raid.pd.health[{#SNMPINDEX}]'
+              delay: 3m
+              history: 30d
+              valuemap:
+                name: 'XCC RAID PD health'
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var s = (value || '').trim().toLowerCase();
+                      if (s === '') return 0;
+                      if (s === 'normal') return 1;
+                      if (s.includes('degrad') || s.includes('warn') || s.includes('noncritical') || s.includes('non-critical')) return 3;
+                      return 5;
+              tags:
+                - tag: Application
+                  value: 'RAID Physical Disks'
+              trigger_prototypes:
+                - uuid: 4c7d2f9f0f7e4a9c8e7d1f5b9d0a3333
+                  expression: 'last(/Lenovo XCC SNMPv3/raid.pd.health[{#SNMPINDEX}])>=5'
+                  name: 'Physical disk [{#PDNAME}]: Health FAILED/CRITICAL'
+                  priority: HIGH
+                  manual_close: 'YES'
+            - uuid: 4c7d2f9f0f7e4a9c8e7d1f5b9d0a1111
+              name: 'Physical disk [{#PDNAME}]: Part number'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.3.1.18.{#SNMPINDEX}'
+              key: 'raid.pd.partno[{#SNMPINDEX}]'
+              delay: 1h
+              history: 2w
+              value_type: TEXT
+              tags:
+                - tag: Application
+                  value: 'RAID Physical Disks'
+            - uuid: 5c7d2f9f0f7e4a9c8e7d1f5b9d0a8888
+              name: 'Physical disk [{#PDNAME}]: State (raw)'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.3.1.4.{#SNMPINDEX}'
+              key: 'raid.pd.state.raw[{#SNMPINDEX}]'
+              delay: 3m
+              history: 30d
+              value_type: TEXT
+              tags:
+                - tag: Application
+                  value: 'RAID Physical Disks'
+            - uuid: 4c7d2f9f0f7e4a9c8e7d1f5b9d0a4444
+              name: 'Physical disk [{#PDNAME}]: State'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.3.1.4.{#SNMPINDEX}'
+              key: 'raid.pd.state[{#SNMPINDEX}]'
+              delay: 3m
+              history: 30d
+              description: 'Numeric PD role/state for dashboards: 1=Online, 2=Hot spare, 3=Unconfigured good (unused), 4=Rebuilding, 5=Offline/Failed/Missing, 0=Unknown.'
+              valuemap:
+                name: 'XCC RAID PD state'
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var s = (value || '').trim().toLowerCase();
+                      if (s === '') return 0;
+                      if (s === 'online') return 1;
+                      if (s.includes('hot') && s.includes('spare')) return 2;
+                      if (s === 'unconfigured good' || s === 'unconfigured-good') return 3;
+                      if (s.includes('rebuild')) return 4;
+                      // Anything else (offline, missing, failed, degraded, etc)
+                      return 5;
+              tags:
+                - tag: Application
+                  value: 'RAID Physical Disks'
+              trigger_prototypes:
+                - uuid: 4c7d2f9f0f7e4a9c8e7d1f5b9d0a5555
+                  expression: 'last(/Lenovo XCC SNMPv3/raid.pd.state[{#SNMPINDEX}])>=5'
+                  name: 'Physical disk [{#PDNAME}]: NOT Online (Offline/Failed/Missing)'
+                  priority: HIGH
+                  manual_close: 'YES'
+            - uuid: 9f0a1b2c3d4e4f5a8b9c0d1e2f3a4b5c
+              name: 'Physical disk {#SNMPINDEX} ({#PDNAME}): Wear remaining (%)'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.3.1.25.{#SNMPINDEX}'
+              key: 'raid.pd.wear.pct[{#SNMPINDEX}]'
+              delay: 1h
+              history: 30d
+              value_type: FLOAT
+              units: '%'
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var s = (value || '').trim();
+                      // Expected like '98%' for SSD. HDD commonly returns 'Not Available' or empty.
+                      var m = s.match(/(\d+(?:\.\d+)?)\s*%/);
+                      if (m) return parseFloat(m[1]);
+                      return null; // unsupported for non-SSD
+              tags:
+                - tag: Application
+                  value: 'SSD Wear'
+                - tag: component
+                  value: storage
+                - tag: metric
+                  value: wear
+            - uuid: 4c7d2f9f0f7e4a9c8e7d1f5b9d0a7777
+              name: 'Physical disk [{#PDNAME}]: Wear'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.3.1.25.{#SNMPINDEX}'
+              key: 'raid.pd.wear[{#SNMPINDEX}]'
+              delay: 1h
+              history: 30d
+              value_type: TEXT
+              tags:
+                - tag: Application
+                  value: 'RAID Physical Disks'
+          overrides:
+            - name: 'Disable SSD wear item for non-SSD drives'
+              step: '1'
+              filter:
+                evaltype: AND
+                conditions:
+                  - macro: '{#PDTYPE}'
+                    value: ^SSD$
+                    operator: NOT_MATCHES_REGEX
+              operations:
+                - value: 'raid.pd.wear.pct[{#SNMPINDEX}]'
+                  status: DISABLED
+        - uuid: 7e1f2a3b4c5d4e6f8a9b0c1d2e3f4444
+          name: 'RAID Volume (Virtual Drive) Discovery (XCC)'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#VDNAME},1.3.6.1.4.1.19046.11.1.1.13.1.7.1.2,{#RAIDLEVEL},1.3.6.1.4.1.19046.11.1.1.13.1.6.1.4]'
+          key: raid.vd.discovery
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discover RAID Virtual Drives from LENOVO-XCC-MIB raidVolumeTable (…13.1.7).'
+          item_prototypes:
+            - uuid: 7e1f2a3b4c5d4e6f8a9b0c1d2e3f7777
+              name: 'Virtual disk [{#VDNAME} - {#RAIDLEVEL}]: Size'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.7.1.5.{#SNMPINDEX}'
+              key: 'raid.vd.size[{#SNMPINDEX}]'
+              delay: 1h
+              history: 30d
+              value_type: TEXT
+              tags:
+                - tag: Application
+                  value: 'RAID Volumes'
+            - uuid: 8e1f2a3b4c5d4e6f8a9b0c1d2e3f8888
+              name: 'Virtual disk [{#VDNAME} - {#RAIDLEVEL}]: Status (raw)'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.7.1.4.{#SNMPINDEX}'
+              key: 'raid.vd.status.raw[{#SNMPINDEX}]'
+              delay: 3m
+              history: 30d
+              value_type: TEXT
+              tags:
+                - tag: Application
+                  value: 'RAID Volumes'
+            - uuid: 7e1f2a3b4c5d4e6f8a9b0c1d2e3f5555
+              name: 'Virtual disk [{#VDNAME} - {#RAIDLEVEL}]: Status'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.7.1.4.{#SNMPINDEX}'
+              key: 'raid.vd.status[{#SNMPINDEX}]'
+              delay: 3m
+              history: 30d
+              valuemap:
+                name: 'XCC RAID VD status'
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var s = (value || '').trim().toLowerCase();
+                      if (s === '') return 0;
+                      if (s === 'optimal') return 1;
+                      if (s.includes('rebuild')) return 4;
+                      if (s.includes('degrad')) return 3;
+                      return 5;
+              tags:
+                - tag: Application
+                  value: 'RAID Volumes'
+              trigger_prototypes:
+                - uuid: e6f6f52ae4ff4a9bada2242de3fa06fe
+                  expression: 'nodata(/Lenovo XCC SNMPv3/raid.vd.status[{#SNMPINDEX}],10m)=0 and last(/Lenovo XCC SNMPv3/raid.vd.status[{#SNMPINDEX}])=5'
+                  name: 'Virtual disk [{#VDNAME}]: FAILED/OFFLINE'
+                  priority: DISASTER
+                  manual_close: 'YES'
+                - uuid: 7e1f2a3b4c5d4e6f8a9b0c1d2e3f6666
+                  expression: 'nodata(/Lenovo XCC SNMPv3/raid.vd.status[{#SNMPINDEX}],10m)=0 and (last(/Lenovo XCC SNMPv3/raid.vd.status[{#SNMPINDEX}])=3 or last(/Lenovo XCC SNMPv3/raid.vd.status[{#SNMPINDEX}])=4)'
+                  name: 'Virtual disk [{#VDNAME}]: NOT Optimal (Degraded/Rebuild)'
+                  priority: HIGH
+                  manual_close: 'YES'
+        - uuid: 62766f16144246e0b6888bddb89b1360
+          name: 'RAID Controller discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#IFNAME},1.3.6.1.4.1.19046.11.1.1.13.1.2.1.2,{#IFVERSION},1.3.6.1.4.1.19046.11.1.1.13.1.2.1.4]'
+          key: raidcontroller
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          item_prototypes:
+            - uuid: a42584c7cb4c44719ab2cdc99b7f95ac
+              name: 'RAID controller battery backup - {#SNMPINDEX}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.2.1.5.{#SNMPINDEX}'
+              key: 'raidctrlbatbck[{#SNMPINDEX}]'
+              history: 2d
+              trends: 5d
+              valuemap:
+                name: 'raid ctrl batbck'
+            - uuid: 0f0229505b714d34839e935b15aa1901
+              name: 'RAID controller name - {#SNMPINDEX}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.2.1.2.{#SNMPINDEX}'
+              key: 'raidctrlname[{#SNMPINDEX}]'
+              history: 2d
+              value_type: TEXT
+            - uuid: d6fa73c627174f92b3d1c57c22a1ee20
+              name: 'RAID controller version - {#SNMPINDEX}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.2.1.4.{#SNMPINDEX}'
+              key: 'raidctrlver[{#SNMPINDEX}]'
+              history: 2d
+              value_type: TEXT
+            - uuid: a782f3f5184d491a8018b3a9e4f94e53
+              name: 'RAID controller Model - {#SNMPINDEX}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.2.1.9.{#SNMPINDEX}'
+              key: 'raidctrlvpdmodel[{#SNMPINDEX}]'
+              history: 2d
+              value_type: TEXT
+            - uuid: e2647b4f3ff34e2aa6c9c520a89be2e6
+              name: 'RAID controller Part Number - {#SNMPINDEX}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.2.1.12.{#SNMPINDEX}'
+              key: 'raidctrlvpdpartno[{#SNMPINDEX}]'
+              history: 2d
+              value_type: TEXT
+            - uuid: bc325159f8c345249c97542c9de9c887
+              name: 'RAID controller Serial Number - {#SNMPINDEX}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.2.1.10.{#SNMPINDEX}'
+              key: 'raidctrlvpdsrnum[{#SNMPINDEX}]'
+              history: 2d
+              value_type: TEXT
+            - uuid: 60c270b2bcbe4ec2aacf3720d9bf6282
+              name: 'RAID controller FRU - {#SNMPINDEX}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.2.1.11.{#SNMPINDEX}'
+              key: 'raidctrlvpfru[{#SNMPINDEX}]'
+              history: 2d
+              value_type: TEXT
+        - uuid: 3a540c022e1649c7abc324e400559a87
+          name: 'Storage Pool Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#IFNAME},1.3.6.1.4.1.19046.11.1.1.13.1.6.1.2]'
+          key: raidstoragepool
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          item_prototypes:
+            - uuid: 42cf074239d84336a259a8cae1495f96
+              name: 'Storage Pool {#SNMPINDEX} Capacity'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.6.1.5.{#SNMPINDEX}'
+              key: 'raidstoragepoolcapacity[{#SNMPINDEX}]'
+              history: 2d
+              value_type: TEXT
+            - uuid: 55340e00945047aca67659b2c9c202da
+              name: 'Storage Pool Controller {#SNMPINDEX} Name'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.6.1.3.{#SNMPINDEX}'
+              key: 'raidstoragepoolcntrl[{#SNMPINDEX}]'
+              history: 2d
+              value_type: TEXT
+              tags:
+                - tag: hardware
+                  value: storage
+            - uuid: 6259b48493da47eaa54f8691edaa1f89
+              name: 'Storage Pool {#SNMPINDEX} Drives'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.6.1.7.{#SNMPINDEX}'
+              key: 'raidstoragepooldrives[{#SNMPINDEX}]'
+              history: 2d
+              value_type: TEXT
+            - uuid: 423e90da7ce446cbae1af2e457e3cb84
+              name: 'Storage Pool {#SNMPINDEX} Stat'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.6.1.4.{#SNMPINDEX}'
+              key: 'raidstoragepoolstat[{#SNMPINDEX}]'
+              history: 2d
+              value_type: TEXT
+            - uuid: f1bbe901c2e540d1ad049c86375265cf
+              name: 'Storage Pool {#SNMPINDEX} VolumeList'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.6.1.6.{#SNMPINDEX}'
+              key: 'raidstoragepoolvollist[{#SNMPINDEX}]'
+              history: 2d
+              value_type: TEXT
+            - uuid: 00f4b532f0dd4d078a333170d1c98028
+              name: 'Storage Pool {#SNMPINDEX} Name'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.13.1.6.1.2.{#SNMPINDEX}'
+              key: 'raidstoragepool[{#SNMPINDEX}]'
+              history: 2d
+              value_type: TEXT
+        - uuid: dd1ed96ee1fe4ab8aba051894a3c9031
+          name: 'Temperature Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#TEMP_NAME},1.3.6.1.4.1.19046.11.1.1.1.2.1.2]'
+          key: temp.discovery
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          item_prototypes:
+            - uuid: 9653da44516745bf9d581e6e97d32e1d
+              name: 'Temperature sensor [{#TEMP_NAME}]: Value'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.19046.11.1.1.1.2.1.3.{#SNMPINDEX}'
+              key: 'sensor.temp.value[{#SNMPINDEX}]'
+              history: 30d
+              value_type: FLOAT
+              units: °C
+              preprocessing:
+                - type: REGEX
+                  parameters:
+                    - '([-+]?[0-9]+(?:\.[0-9]+)?)'
+                    - \1
+              tags:
+                - tag: hardware
+                  value: temperature
+              trigger_prototypes:
+                - uuid: 6977fd50d6864dd498e617b06abdacfc
+                  expression: 'avg(/Lenovo XCC SNMPv3/sensor.temp.value[{#SNMPINDEX}],5m)>{$TEMP_CRIT}'
+                  name: 'Temperature sensor [{#TEMP_NAME}] critical (>{$TEMP_CRIT})'
+                  priority: HIGH
+                  manual_close: 'YES'
+                - uuid: 95a79af44ec84c84b96324612ae0ec3c
+                  expression: 'avg(/Lenovo XCC SNMPv3/sensor.temp.value[{#SNMPINDEX}],5m)>{$TEMP_WARN}'
+                  name: 'Temperature sensor [{#TEMP_NAME}] high (>{$TEMP_WARN})'
+                  priority: WARNING
+                  manual_close: 'YES'
+      macros:
+        - macro: '{$DISK_OK_STATUS}'
+          value: Normal
+        - macro: '{$FAN_OK_STATUS}'
+          value: Normal
+        - macro: '{$HEALTH_CRIT_STATUS}'
+          value: '2'
+        - macro: '{$HEALTH_DISASTER_STATUS}'
+          value: '0'
+        - macro: '{$HEALTH_WARN_STATUS}'
+          value: '4'
+        - macro: '{$NAME.NOT_MATCHES}'
+          value: DTS
+        - macro: '{$PSU_OK_STATUS}'
+          value: Normal
+        - macro: '{$TEMP_CRIT}'
+          value: '60'
+        - macro: '{$TEMP_CRIT:"Ambient"}'
+          value: '35'
+        - macro: '{$TEMP_CRIT_LOW}'
+          value: '5'
+        - macro: '{$TEMP_WARN}'
+          value: '50'
+        - macro: '{$TEMP_WARN:"Ambient"}'
+          value: '35'
+      dashboards:
+        - uuid: cefbf10225be4c73a0ad68def9b6dc38
+          name: Overview
+          pages:
+            - name: Overview
+              display_period: '30'
+              widgets:
+                - type: item
+                  name: 'Power status'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 2196F3
+                    - type: STRING
+                      name: description
+                      value: 'Power status'
+                    - type: STRING
+                      name: desc_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Lenovo XCC SNMPv3'
+                        key: currentSysPowerStatus
+                    - type: INTEGER
+                      name: show.0
+                      value: '1'
+                    - type: INTEGER
+                      name: show.1
+                      value: '2'
+                    - type: STRING
+                      name: value_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: value_size
+                      value: '35'
+                - type: item
+                  name: 'Machine model'
+                  'y': '4'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 2196F3
+                    - type: STRING
+                      name: description
+                      value: 'Machine model'
+                    - type: STRING
+                      name: desc_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Lenovo XCC SNMPv3'
+                        key: machinemodel
+                    - type: INTEGER
+                      name: show.0
+                      value: '1'
+                    - type: INTEGER
+                      name: show.1
+                      value: '2'
+                    - type: STRING
+                      name: value_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: value_size
+                      value: '35'
+                - type: item
+                  name: 'System state'
+                  x: '36'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 2196F3
+                    - type: STRING
+                      name: description
+                      value: 'System state'
+                    - type: STRING
+                      name: desc_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Lenovo XCC SNMPv3'
+                        key: IMMsystemState
+                    - type: INTEGER
+                      name: show.0
+                      value: '1'
+                    - type: INTEGER
+                      name: show.1
+                      value: '2'
+                    - type: STRING
+                      name: value_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: value_size
+                      value: '35'
+                - type: item
+                  name: 'Serial number'
+                  x: '36'
+                  'y': '4'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 2196F3
+                    - type: STRING
+                      name: description
+                      value: 'Serial number'
+                    - type: STRING
+                      name: desc_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Lenovo XCC SNMPv3'
+                        key: machinesrno
+                    - type: INTEGER
+                      name: show.0
+                      value: '1'
+                    - type: INTEGER
+                      name: show.1
+                      value: '2'
+                    - type: STRING
+                      name: value_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: value_size
+                      value: '35'
+            - name: Discoveries
+              display_period: '30'
+              widgets:
+                - type: honeycomb
+                  name: Fans
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: items.0
+                      value: 'Fan *: Status'
+                    - type: STRING
+                      name: primary_label
+                      value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+                    - type: INTEGER
+                      name: primary_label_size_type
+                      value: '1'
+                    - type: STRING
+                      name: reference
+                      value: AAAAB
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: 9E9E9E
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: 069C56
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: FF980E
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '3'
+                    - type: STRING
+                      name: thresholds.3.color
+                      value: D3212C
+                    - type: STRING
+                      name: thresholds.3.threshold
+                      value: '5'
+                - type: honeycomb
+                  name: 'Physical disks (State)'
+                  'y': '4'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: items.0
+                      value: 'Physical disk *: State'
+                    - type: STRING
+                      name: primary_label
+                      value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+                    - type: INTEGER
+                      name: primary_label_size_type
+                      value: '1'
+                    - type: STRING
+                      name: reference
+                      value: AAAAE
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: 9E9E9E
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: 069C56
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: 1E88E5
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '2'
+                    - type: STRING
+                      name: thresholds.3.color
+                      value: FF980E
+                    - type: STRING
+                      name: thresholds.3.threshold
+                      value: '4'
+                    - type: STRING
+                      name: thresholds.4.color
+                      value: D3212C
+                    - type: STRING
+                      name: thresholds.4.threshold
+                      value: '5'
+                - type: honeycomb
+                  name: 'Virtual disks'
+                  'y': '8'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: items.0
+                      value: 'Virtual disk *: Status'
+                    - type: STRING
+                      name: primary_label
+                      value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+                    - type: INTEGER
+                      name: primary_label_size_type
+                      value: '1'
+                    - type: STRING
+                      name: reference
+                      value: AAAAG
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: 9E9E9E
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: 069C56
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: FF980E
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '3'
+                    - type: STRING
+                      name: thresholds.3.color
+                      value: D3212C
+                    - type: STRING
+                      name: thresholds.3.threshold
+                      value: '5'
+                - type: honeycomb
+                  name: 'SSD wear remaining'
+                  'y': '12'
+                  width: '72'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: items.0
+                      value: 'Physical disk *: Wear remaining (%)'
+                    - type: STRING
+                      name: primary_label
+                      value: '{{ITEM.NAME}.regsub("^Physical disk ([0-9]+) \((.*?)\): Wear remaining \(\%\)$", "\2")}'
+                    - type: INTEGER
+                      name: primary_label_size_type
+                      value: '1'
+                    - type: STRING
+                      name: reference
+                      value: LNX07
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: D3212C
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: FEC400
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '30'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: 069C56
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '40'
+                - type: honeycomb
+                  name: 'Power supplies'
+                  x: '36'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: items.0
+                      value: 'Power supply *: Status'
+                    - type: STRING
+                      name: primary_label
+                      value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+                    - type: INTEGER
+                      name: primary_label_size_type
+                      value: '1'
+                    - type: STRING
+                      name: reference
+                      value: AAAAC
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: 9E9E9E
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: 069C56
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: FF980E
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '3'
+                    - type: STRING
+                      name: thresholds.3.color
+                      value: D3212C
+                    - type: STRING
+                      name: thresholds.3.threshold
+                      value: '5'
+                - type: honeycomb
+                  name: 'Physical disks (Health)'
+                  x: '36'
+                  'y': '4'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: items.0
+                      value: 'Physical disk *: Health'
+                    - type: STRING
+                      name: primary_label
+                      value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+                    - type: INTEGER
+                      name: primary_label_size_type
+                      value: '1'
+                    - type: STRING
+                      name: reference
+                      value: AAAAF
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: 9E9E9E
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: 069C56
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: FF980E
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '3'
+                    - type: STRING
+                      name: thresholds.3.color
+                      value: D3212C
+                    - type: STRING
+                      name: thresholds.3.threshold
+                      value: '5'
+                - type: honeycomb
+                  name: 'Memory modules'
+                  x: '36'
+                  'y': '8'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: items.0
+                      value: 'Memory module *: Status'
+                    - type: STRING
+                      name: primary_label
+                      value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+                    - type: INTEGER
+                      name: primary_label_size_type
+                      value: '1'
+                    - type: STRING
+                      name: reference
+                      value: AAAAD
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: 9E9E9E
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: 069C56
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: FF980E
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '3'
+                    - type: STRING
+                      name: thresholds.3.color
+                      value: D3212C
+                    - type: STRING
+                      name: thresholds.3.threshold
+                      value: '5'
+      valuemaps:
+        - uuid: 9999f3bc19c34e1f9a8e63bc58938999
+          name: 'Component Health Status'
+          mappings:
+            - value: '0'
+              newvalue: nonRecoverable
+            - value: '1'
+              newvalue: ok
+        - uuid: 2224f3bc19c34e1f9a8e63bc58938123
+          name: currentSysPowerStatus
+          mappings:
+            - value: '0'
+              newvalue: poweredOff
+            - value: '1'
+              newvalue: sleepS3
+            - value: '255'
+              newvalue: poweredOn
+        - uuid: 6e1a86cbdafc4b5499b4e748afc078b7
+          name: 'IMM-MIB::systemHealthStat'
+          mappings:
+            - value: '0'
+              newvalue: nonRecoverable
+            - value: '2'
+              newvalue: critical
+            - value: '4'
+              newvalue: nonCritical
+            - value: '255'
+              newvalue: ok
+        - uuid: 77a1891a047d4033a2456fc0412df21b
+          name: ledstate
+          mappings:
+            - value: '0'
+              newvalue: 'off'
+            - value: '1'
+              newvalue: 'on'
+            - value: '2'
+              newvalue: blinking
+        - uuid: 027b1e13375d4fa486fa3dc89b8dc2a1
+          name: 'raid ctrl batbck'
+          mappings:
+            - value: '0'
+              newvalue: uninstalled
+            - value: '1'
+              newvalue: installed
+            - value: '2'
+              newvalue: unknown
+        - uuid: 5575d7f999004fe385931f5a759b16c2
+          name: raidoobcapable
+          mappings:
+            - value: '0'
+              newvalue: disabled
+            - value: '1'
+              newvalue: enabled
+        - uuid: a33ac68ed7964dc0af0656758418c98b
+          name: systemState
+          mappings:
+            - value: '0'
+              newvalue: systemPowerOfforStateUnknown
+            - value: '1'
+              newvalue: systemPowerOnorStartingUEFI
+            - value: '2'
+              newvalue: systemInUEFI
+            - value: '3'
+              newvalue: uEFIErrorDetected
+            - value: '4'
+              newvalue: bootingOSorInUnsupportedOS
+            - value: '5'
+              newvalue: oSBooted
+            - value: '6'
+              newvalue: suspendToRAM
+            - value: '7'
+              newvalue: systemInSetup
+            - value: '8'
+              newvalue: systemInLXPMMaintenanceMode
+            - value: '9'
+              newvalue: systemInMemoryTest
+        - uuid: d81bca088be84ccc9bf9e31c3b8929e1
+          name: 'XCC Fan status'
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: ok
+            - value: '2'
+              newvalue: notInstalled
+            - value: '5'
+              newvalue: nonRecoverable
+        - uuid: 03cc101549d14f2e8c1f2f14ba23b217
+          name: 'XCC Memory status'
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: ok
+            - value: '3'
+              newvalue: nonCritical
+            - value: '5'
+              newvalue: critical
+        - uuid: 16144a2a731947c889be0c7c13f46dcb
+          name: 'XCC PSU status'
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: ok
+            - value: '5'
+              newvalue: critical
+        - uuid: 5649d5aa9f9942a49ceecf7fa67a3a46
+          name: 'XCC RAID PD health'
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: ok
+            - value: '3'
+              newvalue: nonCritical
+            - value: '5'
+              newvalue: critical
+        - uuid: d78477c90fc64b6fadcc053a0c7ffdd4
+          name: 'XCC RAID PD state'
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: Online
+            - value: '2'
+              newvalue: Hot spare
+            - value: '3'
+              newvalue: Unconfigured good
+            - value: '4'
+              newvalue: Rebuilding
+            - value: '5'
+              newvalue: Offline/Failed/Missing
+        - uuid: 33d1b59df2264cbe823d42bdfb3d5fdf
+          name: 'XCC RAID VD status'
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: Online
+            - value: '3'
+              newvalue: Degraded
+            - value: '4'
+              newvalue: Rebuilding
+            - value: '5'
+              newvalue: Failed
+        - uuid: b1ee719aa86a425ebd929cdfcc235a11
+          name: 'XCC status code'
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: ok
+            - value: '2'
+              newvalue: Hot spare
+            - value: '3'
+              newvalue: nonCritical
+            - value: '4'
+              newvalue: Rebuilding
+            - value: '5'
+              newvalue: critical

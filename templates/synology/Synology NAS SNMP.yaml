@@ -1,0 +1,1299 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 0f609231b71d482688fa67d37d9b3328
+      name: 'Templates/Servers Hardware'
+  templates:
+    - uuid: 39da6b6747314b81ae99522bf0cd67ab
+      template: 'Synology NAS SNMP'
+      name: 'Synology NAS SNMP'
+      description: |
+        Unified Synology SNMP template (styled after the provided Lenovo/IMM templates).
+        Includes:
+          - System status, temperature, fan, power, DSM info, CPU and memory utilization
+          - Disk discovery with status, health, temperature, bad-sector counters and SSD wear
+          - RAID discovery with health and capacity
+          - Blue summary cards and honeycomb dashboards similar to the provided reference template
+      vendor:
+        name: Custom
+        version: 7.0-synology-unified
+      groups:
+        - name: 'Templates/Servers Hardware'
+      items:
+        - uuid: ed16b4648f4642e2b0dad5bb3ef6ac42
+          name: 'Controller Number'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.6574.1.6
+          key: syno.controller.number
+          delay: 1h
+          history: 2d
+          trends: 5d
+          valuemap:
+            name: 'Synology controller number'
+          tags:
+            - tag: Application
+              value: system
+        - uuid: 7714d40c129a4ca1bd9f327e5c0b4683
+          name: 'CPU Fan Status'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.6574.1.4.2
+          key: syno.cpu.fan.status
+          delay: '300'
+          history: 2d
+          trends: 5d
+          valuemap:
+            name: 'Synology binary status'
+          tags:
+            - tag: Application
+              value: system
+          triggers:
+            - uuid: d5df866cf191490ba350f230c1c0bd9c
+              expression: 'last(/Synology NAS SNMP/syno.cpu.fan.status)=2'
+              name: 'CPU fan status is failed'
+              priority: HIGH
+              manual_close: 'YES'
+        - uuid: 3f9abccc1ec647d9913289b67cc650c3
+          name: 'CPU Utilization'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.6574.1.7.1
+          key: syno.cpu.util
+          delay: 120s
+          history: 2d
+          trends: 5d
+          units: '%'
+          tags:
+            - tag: Application
+              value: system
+        - uuid: d86ac150f4fb49b3b658808a690ede6a
+          name: 'Memory Utilization'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.6574.1.7.2
+          key: syno.mem.util
+          delay: 120s
+          history: 2d
+          trends: 5d
+          units: '%'
+          tags:
+            - tag: Application
+              value: system
+        - uuid: 8ce6ba3cce2d44e497f318ff7d806019
+          name: 'Model Name'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.6574.1.5.1
+          key: syno.model
+          delay: 1h
+          history: 2d
+          value_type: TEXT
+          tags:
+            - tag: Application
+              value: hardware
+        - uuid: 8f360c715b42450ab925f99e8af98e7d
+          name: 'Power Status'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.6574.1.3
+          key: syno.power.status
+          delay: '300'
+          history: 2d
+          trends: 5d
+          valuemap:
+            name: 'Synology binary status'
+          tags:
+            - tag: Application
+              value: system
+          triggers:
+            - uuid: d14f78ad7bea4dff9dc2895a076dd8bb
+              expression: 'last(/Synology NAS SNMP/syno.power.status)=2'
+              name: 'Power supply status is failed'
+              priority: HIGH
+              manual_close: 'YES'
+        - uuid: 68461d4793ea42a9bc4fbc222da8b55c
+          name: 'Serial Number'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.6574.1.5.2
+          key: syno.serial
+          delay: 1h
+          history: 2d
+          value_type: TEXT
+          tags:
+            - tag: Application
+              value: hardware
+        - uuid: 654f06b251fa4354ab241c95ef602c82
+          name: 'System Fan Status'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.6574.1.4.1
+          key: syno.system.fan.status
+          delay: '300'
+          history: 2d
+          trends: 5d
+          valuemap:
+            name: 'Synology binary status'
+          tags:
+            - tag: Application
+              value: system
+          triggers:
+            - uuid: a57129ddc919427dafbf8b6d3e011a89
+              expression: 'last(/Synology NAS SNMP/syno.system.fan.status)=2'
+              name: 'System fan status is failed'
+              priority: HIGH
+              manual_close: 'YES'
+        - uuid: 2eca7d2b062347c8a30cb5ecedb43558
+          name: 'System Status'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.6574.1.1
+          key: syno.system.status
+          delay: '300'
+          history: 2d
+          trends: 5d
+          valuemap:
+            name: 'Synology binary status'
+          tags:
+            - tag: Application
+              value: system
+          triggers:
+            - uuid: 20a272f6a3ab446b8e2c8bfd6157707c
+              expression: 'last(/Synology NAS SNMP/syno.system.status)=2'
+              name: 'System partition status is failed'
+              priority: HIGH
+              manual_close: 'YES'
+        - uuid: 3a56251b9d2d494eaabe4570a0febe97
+          name: 'System Temperature'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.6574.1.2
+          key: syno.temperature
+          delay: 120s
+          history: 2d
+          trends: 5d
+          units: C
+          tags:
+            - tag: Application
+              value: system
+        - uuid: 54b55c266b9147eab00cee8e9028b673
+          name: 'Thermal Status'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.6574.1.8
+          key: syno.thermal.status
+          delay: '300'
+          history: 2d
+          trends: 5d
+          valuemap:
+            name: 'Synology binary status'
+          tags:
+            - tag: Application
+              value: system
+          triggers:
+            - uuid: 3eca0d7e779f4c83a7afef27ba16f195
+              expression: 'last(/Synology NAS SNMP/syno.thermal.status)=2'
+              name: 'Thermal status is failed'
+              priority: HIGH
+              manual_close: 'YES'
+        - uuid: 8e71a552cbfc4662b68ae80d22ebc437
+          name: 'DSM Upgrade Status'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.6574.1.5.4
+          key: syno.upgrade.available
+          delay: 1h
+          history: 2d
+          trends: 5d
+          valuemap:
+            name: 'Synology DSM upgrade status'
+          tags:
+            - tag: Application
+              value: software
+        - uuid: 4171689395134c9184f3e2346d826ac1
+          name: 'DSM Version'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.6574.1.5.3
+          key: syno.version
+          delay: 1h
+          history: 2d
+          value_type: TEXT
+          tags:
+            - tag: Application
+              value: software
+      discovery_rules:
+        - uuid: d8aab7917bb341d3bfb46dd6120de997
+          name: 'Disk Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#DISKINDEX},1.3.6.1.4.1.6574.2.1.1.1,{#DISKID},1.3.6.1.4.1.6574.2.1.1.2,{#DISKMODEL},1.3.6.1.4.1.6574.2.1.1.3,{#DISKTYPE},1.3.6.1.4.1.6574.2.1.1.4,{#DISKNAME},1.3.6.1.4.1.6574.2.1.1.12]'
+          key: disk.discovery
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discover Synology disks from SYNOLOGY-DISK-MIB diskTable.'
+          item_prototypes:
+            - uuid: bea7440fb493447caf934c29b108a26b
+              name: 'Disk [{#DISKNAME}]: Bad sectors'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6574.2.1.1.9.{#DISKINDEX}'
+              key: 'disk.badsector[{#DISKINDEX}]'
+              history: 2d
+              trends: 5d
+              tags:
+                - tag: component
+                  value: disk
+                - tag: metric
+                  value: badsector
+            - uuid: 773a06aa800149ae91579cfa62d3619d
+              name: 'Disk [{#DISKNAME}]: Health raw'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6574.2.1.1.13.{#DISKINDEX}'
+              key: 'disk.health.raw[{#DISKINDEX}]'
+              history: 2d
+              trends: 5d
+              valuemap:
+                name: 'Synology disk health raw'
+              tags:
+                - tag: component
+                  value: disk
+                - tag: metric
+                  value: health
+            - uuid: 704a84dc3f05475a951dd508164b00d5
+              name: 'Disk [{#DISKNAME}]: Health'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6574.2.1.1.13.{#DISKINDEX}'
+              key: 'disk.health[{#DISKINDEX}]'
+              history: 2d
+              trends: 5d
+              valuemap:
+                name: 'Synology disk health summary'
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var v = parseInt(value, 10);
+                      if (isNaN(v)) return 0;
+                      if (v === 1) return 1;
+                      if (v === 2) return 3;
+                      if (v === 3 || v === 4) return 5;
+                      return 0;
+              tags:
+                - tag: component
+                  value: disk
+                - tag: metric
+                  value: health
+              trigger_prototypes:
+                - uuid: 655050569f3d4bc7a4d334fc0b44582b
+                  expression: 'last(/Synology NAS SNMP/disk.health[{#DISKINDEX}])=5'
+                  name: 'Disk [{#DISKNAME}]: health critical'
+                  priority: HIGH
+                  manual_close: 'YES'
+                - uuid: 573c39169d3a46f091de38eb0d5cb4fc
+                  expression: 'last(/Synology NAS SNMP/disk.health[{#DISKINDEX}])=3'
+                  name: 'Disk [{#DISKNAME}]: health warning'
+                  priority: WARNING
+                  manual_close: 'YES'
+            - uuid: 8a1bc3fafc2b4b4a8da63554ae08e01e
+              name: 'Disk [{#DISKNAME}]: Identify fails'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6574.2.1.1.10.{#DISKINDEX}'
+              key: 'disk.identifyfail[{#DISKINDEX}]'
+              history: 2d
+              trends: 5d
+              tags:
+                - tag: component
+                  value: disk
+                - tag: metric
+                  value: identify
+            - uuid: 631214d7ae5a4456a1ee736610cf8446
+              name: 'Disk [{#DISKNAME}]: DSM ID'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6574.2.1.1.2.{#DISKINDEX}'
+              key: 'disk.id[{#DISKINDEX}]'
+              history: 2d
+              value_type: TEXT
+              tags:
+                - tag: component
+                  value: disk
+            - uuid: d77e9058a13b4029bd6917cf07dc01c9
+              name: 'Disk [{#DISKNAME}]: Model'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6574.2.1.1.3.{#DISKINDEX}'
+              key: 'disk.model[{#DISKINDEX}]'
+              history: 2d
+              value_type: TEXT
+              tags:
+                - tag: component
+                  value: disk
+            - uuid: 5a63ea57f27243dab65df7a3658a4aba
+              name: 'Disk [{#DISKNAME}]: Retry count'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6574.2.1.1.8.{#DISKINDEX}'
+              key: 'disk.retry[{#DISKINDEX}]'
+              history: 2d
+              trends: 5d
+              tags:
+                - tag: component
+                  value: disk
+                - tag: metric
+                  value: retry
+            - uuid: ff294c5fb5634cc5ba72bf246b6e4be1
+              name: 'Disk [{#DISKNAME}]: Role'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6574.2.1.1.7.{#DISKINDEX}'
+              key: 'disk.role[{#DISKINDEX}]'
+              history: 2d
+              value_type: TEXT
+              tags:
+                - tag: component
+                  value: disk
+            - uuid: d0769e1588844bb899cec9f9d3504312
+              name: 'Disk [{#DISKNAME}]: Status raw'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6574.2.1.1.5.{#DISKINDEX}'
+              key: 'disk.status.raw[{#DISKINDEX}]'
+              history: 2d
+              trends: 5d
+              valuemap:
+                name: 'Synology disk status raw'
+              tags:
+                - tag: component
+                  value: disk
+                - tag: metric
+                  value: status
+            - uuid: 7e2138e1214b45c3a3223a3af71ed0a2
+              name: 'Disk [{#DISKNAME}]: Status'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6574.2.1.1.5.{#DISKINDEX}'
+              key: 'disk.status.summary[{#DISKINDEX}]'
+              history: 2d
+              trends: 5d
+              valuemap:
+                name: 'Synology disk status summary'
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var v = parseInt(value, 10);
+                      if (isNaN(v)) return 0;
+                      if (v === 1) return 1;
+                      if (v === 2 || v === 3) return 2;
+                      if (v === 4) return 3;
+                      if (v === 5) return 5;
+                      return 0;
+              tags:
+                - tag: component
+                  value: disk
+                - tag: metric
+                  value: health
+              trigger_prototypes:
+                - uuid: 10c61c29a00b45268f342029d1b064b6
+                  expression: 'last(/Synology NAS SNMP/disk.status.summary[{#DISKINDEX}])=5'
+                  name: 'Disk [{#DISKNAME}]: crashed or failed'
+                  priority: HIGH
+                  manual_close: 'YES'
+                - uuid: 259b250f065c420c9db884c2897f008a
+                  expression: 'last(/Synology NAS SNMP/disk.status.summary[{#DISKINDEX}])=3'
+                  name: 'Disk [{#DISKNAME}]: system partition failed'
+                  priority: WARNING
+                  manual_close: 'YES'
+            - uuid: f29f89c8602a47509f54854dc9cc3553
+              name: 'Disk [{#DISKNAME}]: Temperature'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6574.2.1.1.6.{#DISKINDEX}'
+              key: 'disk.temp[{#DISKINDEX}]'
+              history: 2d
+              trends: 5d
+              units: C
+              tags:
+                - tag: component
+                  value: disk
+                - tag: metric
+                  value: temperature
+            - uuid: 5fef53694ce340259ab5a54019c726c9
+              name: 'Disk [{#DISKNAME}]: Type'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6574.2.1.1.4.{#DISKINDEX}'
+              key: 'disk.type[{#DISKINDEX}]'
+              history: 2d
+              value_type: TEXT
+              tags:
+                - tag: component
+                  value: disk
+            - uuid: 75093952ac5f432ebb0b9430c829dcb9
+              name: 'Disk [{#DISKNAME}]: Wear remaining (%)'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6574.2.1.1.11.{#DISKINDEX}'
+              key: 'disk.wear.pct[{#DISKINDEX}]'
+              history: 2d
+              trends: 5d
+              units: '%'
+              tags:
+                - tag: Application
+                  value: 'SSD Wear'
+                - tag: component
+                  value: storage
+                - tag: metric
+                  value: wear
+              trigger_prototypes:
+                - uuid: d8f68411d0884409a0cb99214772d8e8
+                  expression: 'last(/Synology NAS SNMP/disk.wear.pct[{#DISKINDEX}])<30 and last(/Synology NAS SNMP/disk.wear.pct[{#DISKINDEX}])>0'
+                  name: 'Disk [{#DISKNAME}]: wear remaining below 30%'
+                  priority: HIGH
+                  manual_close: 'YES'
+                - uuid: 951b433c4e6245e78c31382723a2bafa
+                  expression: 'last(/Synology NAS SNMP/disk.wear.pct[{#DISKINDEX}])<40 and last(/Synology NAS SNMP/disk.wear.pct[{#DISKINDEX}])>0'
+                  name: 'Disk [{#DISKNAME}]: wear remaining below 40%'
+                  priority: WARNING
+                  manual_close: 'YES'
+          overrides:
+            - name: 'Disable SSD wear item for non-SSD disks'
+              step: '1'
+              filter:
+                evaltype: AND
+                conditions:
+                  - macro: '{#DISKTYPE}'
+                    value: '(?i)ssd'
+                    operator: NOT_MATCHES_REGEX
+              operations:
+                - value: 'disk.wear.pct[{#DISKINDEX}]'
+                  status: DISABLED
+        - uuid: f766bcf25d1046158c2140260edf4ce4
+          name: 'RAID Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#RAIDINDEX},1.3.6.1.4.1.6574.3.1.1.1,{#RAIDNAME},1.3.6.1.4.1.6574.3.1.1.2]'
+          key: raid.discovery
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discover Synology RAID arrays from the RAID MIB described in the Synology SNMP MIB guide.'
+          item_prototypes:
+            - uuid: f2d1e44b21384ab5b81ccb4ceb4f7efd
+              name: 'RAID [{#RAIDNAME}]: Free size'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6574.3.1.1.4.{#RAIDINDEX}'
+              key: 'raid.free[{#RAIDINDEX}]'
+              history: 2d
+              trends: 5d
+              units: B
+              tags:
+                - tag: component
+                  value: raid
+                - tag: metric
+                  value: capacity
+            - uuid: 203f83d9d5a8409aa6036da0731bd6bc
+              name: 'RAID [{#RAIDNAME}]: Health'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6574.3.1.1.3.{#RAIDINDEX}'
+              key: 'raid.health[{#RAIDINDEX}]'
+              history: 2d
+              trends: 5d
+              valuemap:
+                name: 'Synology RAID health summary'
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var v = parseInt(value, 10);
+                      if (isNaN(v)) return 0;
+                      if (v === 1) return 1;
+                      if ((v >= 2 && v <= 10) || (v >= 13 && v <= 20)) return 2;
+                      if (v === 11 || v === 21) return 3;
+                      if (v === 12) return 5;
+                      return 0;
+              tags:
+                - tag: component
+                  value: raid
+                - tag: metric
+                  value: health
+              trigger_prototypes:
+                - uuid: 9992333fe64d45a6a8f75efc0b3e725c
+                  expression: 'last(/Synology NAS SNMP/raid.health[{#RAIDINDEX}])=5'
+                  name: 'RAID [{#RAIDNAME}]: crashed'
+                  priority: HIGH
+                  manual_close: 'YES'
+                - uuid: 80ee335ba22a45ba94075fa97bfaa542
+                  expression: 'last(/Synology NAS SNMP/raid.health[{#RAIDINDEX}])=3'
+                  name: 'RAID [{#RAIDNAME}]: degraded or unknown'
+                  priority: WARNING
+                  manual_close: 'YES'
+            - uuid: 9ae5fbb5d5754632840d620e239e53e4
+              name: 'RAID [{#RAIDNAME}]: Hot spare count'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6574.3.1.1.6.{#RAIDINDEX}'
+              key: 'raid.hotspare[{#RAIDINDEX}]'
+              history: 2d
+              trends: 5d
+              tags:
+                - tag: component
+                  value: raid
+                - tag: metric
+                  value: spare
+            - uuid: 865299763838446f81578fd657f56aec
+              name: 'RAID [{#RAIDNAME}]: Raw status'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6574.3.1.1.3.{#RAIDINDEX}'
+              key: 'raid.status.raw[{#RAIDINDEX}]'
+              history: 2d
+              trends: 5d
+              valuemap:
+                name: 'Synology RAID status raw'
+              tags:
+                - tag: component
+                  value: raid
+                - tag: metric
+                  value: status
+            - uuid: 10b80ef47fb5446f8127ee7bd7648943
+              name: 'RAID [{#RAIDNAME}]: Total size'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6574.3.1.1.5.{#RAIDINDEX}'
+              key: 'raid.total[{#RAIDINDEX}]'
+              history: 2d
+              trends: 5d
+              units: B
+              tags:
+                - tag: component
+                  value: raid
+                - tag: metric
+                  value: capacity
+      dashboards:
+        - uuid: 197aff0cdc03485f90df2063e00136a2
+          name: Overview
+          pages:
+            - name: Overview
+              display_period: '30'
+              widgets:
+                - type: item
+                  name: 'Power status'
+                  width: '24'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 2196F3
+                    - type: STRING
+                      name: description
+                      value: 'Power status'
+                    - type: STRING
+                      name: desc_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Synology NAS SNMP'
+                        key: syno.power.status
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: show.1
+                      value: '1'
+                    - type: STRING
+                      name: value_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: value_size
+                      value: '32'
+                - type: item
+                  name: 'Model name'
+                  'y': '4'
+                  width: '24'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 2196F3
+                    - type: STRING
+                      name: description
+                      value: 'Model name'
+                    - type: STRING
+                      name: desc_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Synology NAS SNMP'
+                        key: syno.model
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: show.1
+                      value: '1'
+                    - type: STRING
+                      name: value_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: value_size
+                      value: '26'
+                - type: item
+                  name: 'System temperature'
+                  'y': '8'
+                  width: '18'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 2196F3
+                    - type: STRING
+                      name: description
+                      value: 'System temperature'
+                    - type: STRING
+                      name: desc_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Synology NAS SNMP'
+                        key: syno.temperature
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: show.1
+                      value: '1'
+                    - type: STRING
+                      name: value_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: value_size
+                      value: '30'
+                - type: item
+                  name: 'System fan'
+                  'y': '12'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 2196F3
+                    - type: STRING
+                      name: description
+                      value: 'System fan'
+                    - type: STRING
+                      name: desc_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Synology NAS SNMP'
+                        key: syno.system.fan.status
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: show.1
+                      value: '1'
+                    - type: STRING
+                      name: value_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: value_size
+                      value: '26'
+                - type: item
+                  name: 'CPU utilization'
+                  x: '18'
+                  'y': '8'
+                  width: '18'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 2196F3
+                    - type: STRING
+                      name: description
+                      value: 'CPU utilization'
+                    - type: STRING
+                      name: desc_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Synology NAS SNMP'
+                        key: syno.cpu.util
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: show.1
+                      value: '1'
+                    - type: STRING
+                      name: value_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: value_size
+                      value: '30'
+                - type: item
+                  name: 'System status'
+                  x: '24'
+                  width: '24'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 2196F3
+                    - type: STRING
+                      name: description
+                      value: 'System status'
+                    - type: STRING
+                      name: desc_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Synology NAS SNMP'
+                        key: syno.system.status
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: show.1
+                      value: '1'
+                    - type: STRING
+                      name: value_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: value_size
+                      value: '32'
+                - type: item
+                  name: 'Serial number'
+                  x: '24'
+                  'y': '4'
+                  width: '24'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 2196F3
+                    - type: STRING
+                      name: description
+                      value: 'Serial number'
+                    - type: STRING
+                      name: desc_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Synology NAS SNMP'
+                        key: syno.serial
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: show.1
+                      value: '1'
+                    - type: STRING
+                      name: value_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: value_size
+                      value: '26'
+                - type: item
+                  name: 'Memory utilization'
+                  x: '36'
+                  'y': '8'
+                  width: '18'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 2196F3
+                    - type: STRING
+                      name: description
+                      value: 'Memory utilization'
+                    - type: STRING
+                      name: desc_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Synology NAS SNMP'
+                        key: syno.mem.util
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: show.1
+                      value: '1'
+                    - type: STRING
+                      name: value_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: value_size
+                      value: '30'
+                - type: item
+                  name: 'CPU fan'
+                  x: '36'
+                  'y': '12'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 2196F3
+                    - type: STRING
+                      name: description
+                      value: 'CPU fan'
+                    - type: STRING
+                      name: desc_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Synology NAS SNMP'
+                        key: syno.cpu.fan.status
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: show.1
+                      value: '1'
+                    - type: STRING
+                      name: value_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: value_size
+                      value: '26'
+                - type: item
+                  name: 'Thermal status'
+                  x: '48'
+                  width: '24'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 2196F3
+                    - type: STRING
+                      name: description
+                      value: 'Thermal status'
+                    - type: STRING
+                      name: desc_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Synology NAS SNMP'
+                        key: syno.thermal.status
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: show.1
+                      value: '1'
+                    - type: STRING
+                      name: value_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: value_size
+                      value: '32'
+                - type: item
+                  name: 'DSM version'
+                  x: '48'
+                  'y': '4'
+                  width: '24'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 2196F3
+                    - type: STRING
+                      name: description
+                      value: 'DSM version'
+                    - type: STRING
+                      name: desc_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Synology NAS SNMP'
+                        key: syno.version
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: show.1
+                      value: '1'
+                    - type: STRING
+                      name: value_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: value_size
+                      value: '26'
+                - type: item
+                  name: 'DSM upgrade'
+                  x: '54'
+                  'y': '8'
+                  width: '18'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 2196F3
+                    - type: STRING
+                      name: description
+                      value: 'DSM upgrade'
+                    - type: STRING
+                      name: desc_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Synology NAS SNMP'
+                        key: syno.upgrade.available
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: show.1
+                      value: '1'
+                    - type: STRING
+                      name: value_color
+                      value: FFFFFF
+                    - type: INTEGER
+                      name: value_size
+                      value: '22'
+            - name: Storage
+              display_period: '30'
+              widgets:
+                - type: honeycomb
+                  name: 'Disk status'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: INTEGER
+                      name: interpolation
+                      value: '0'
+                    - type: STRING
+                      name: items.0
+                      value: 'Disk *: Status'
+                    - type: STRING
+                      name: primary_label
+                      value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+                    - type: INTEGER
+                      name: primary_label_size_type
+                      value: '1'
+                    - type: STRING
+                      name: reference
+                      value: SYNA1
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: 9E9E9E
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: 069C56
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: 1E88E5
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '2'
+                    - type: STRING
+                      name: thresholds.3.color
+                      value: FF980E
+                    - type: STRING
+                      name: thresholds.3.threshold
+                      value: '3'
+                    - type: STRING
+                      name: thresholds.4.color
+                      value: D3212C
+                    - type: STRING
+                      name: thresholds.4.threshold
+                      value: '5'
+                - type: honeycomb
+                  name: 'SSD wear remaining'
+                  'y': '4'
+                  width: '72'
+                  height: '4'
+                  fields:
+                    - type: INTEGER
+                      name: interpolation
+                      value: '0'
+                    - type: STRING
+                      name: items.0
+                      value: 'Disk *: Wear remaining (%)'
+                    - type: STRING
+                      name: primary_label
+                      value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+                    - type: INTEGER
+                      name: primary_label_size_type
+                      value: '1'
+                    - type: STRING
+                      name: reference
+                      value: SYNA3
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: D3212C
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: FEC400
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '30'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: 069C56
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '40'
+                - type: honeycomb
+                  name: 'RAID health'
+                  'y': '8'
+                  width: '72'
+                  height: '4'
+                  fields:
+                    - type: INTEGER
+                      name: interpolation
+                      value: '0'
+                    - type: STRING
+                      name: items.0
+                      value: 'RAID *: Health'
+                    - type: STRING
+                      name: primary_label
+                      value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+                    - type: INTEGER
+                      name: primary_label_size_type
+                      value: '1'
+                    - type: STRING
+                      name: reference
+                      value: SYNA4
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: 9E9E9E
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: 069C56
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: 1E88E5
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '2'
+                    - type: STRING
+                      name: thresholds.3.color
+                      value: FF980E
+                    - type: STRING
+                      name: thresholds.3.threshold
+                      value: '3'
+                    - type: STRING
+                      name: thresholds.4.color
+                      value: D3212C
+                    - type: STRING
+                      name: thresholds.4.threshold
+                      value: '5'
+                - type: honeycomb
+                  name: 'Disk health'
+                  x: '36'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: INTEGER
+                      name: interpolation
+                      value: '0'
+                    - type: STRING
+                      name: items.0
+                      value: 'Disk *: Health'
+                    - type: STRING
+                      name: primary_label
+                      value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+                    - type: INTEGER
+                      name: primary_label_size_type
+                      value: '1'
+                    - type: STRING
+                      name: reference
+                      value: SYNA2
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: 9E9E9E
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: 069C56
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: FF980E
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '3'
+                    - type: STRING
+                      name: thresholds.3.color
+                      value: D3212C
+                    - type: STRING
+                      name: thresholds.3.threshold
+                      value: '5'
+      valuemaps:
+        - uuid: e90fe77f18ee45368bb360c458e6035b
+          name: 'Synology binary status'
+          mappings:
+            - value: '1'
+              newvalue: ok
+            - value: '2'
+              newvalue: critical
+        - uuid: 17d13ea44870422cb20a5310a5a6e0bd
+          name: 'Synology controller number'
+          mappings:
+            - value: '0'
+              newvalue: 'Controller A'
+            - value: '1'
+              newvalue: 'Controller B'
+        - uuid: 022350e366f34e79a46afa5512ebe93a
+          name: 'Synology disk health raw'
+          mappings:
+            - value: '1'
+              newvalue: ok
+            - value: '2'
+              newvalue: nonCritical
+            - value: '3'
+              newvalue: critical
+            - value: '4'
+              newvalue: nonRecoverable
+        - uuid: 5bc8bcb9c6a14fcb9f2c5ee05f40645b
+          name: 'Synology disk health summary'
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: ok
+            - value: '3'
+              newvalue: nonCritical
+            - value: '5'
+              newvalue: critical
+        - uuid: 59d2461dc78a41359c54d9d10d4deb20
+          name: 'Synology disk status raw'
+          mappings:
+            - value: '1'
+              newvalue: ok
+            - value: '2'
+              newvalue: initialized
+            - value: '3'
+              newvalue: notInitialized
+            - value: '4'
+              newvalue: nonCritical
+            - value: '5'
+              newvalue: critical
+        - uuid: 49fa27a5469e453e8f88f60887ce0132
+          name: 'Synology disk status summary'
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: ok
+            - value: '2'
+              newvalue: initialized/unused
+            - value: '3'
+              newvalue: nonCritical
+            - value: '5'
+              newvalue: critical
+        - uuid: f29702e8c8994466b9eb61e54bf4a492
+          name: 'Synology DSM upgrade status'
+          mappings:
+            - value: '1'
+              newvalue: Available
+            - value: '2'
+              newvalue: Unavailable
+            - value: '3'
+              newvalue: Connecting
+            - value: '4'
+              newvalue: Disconnected
+            - value: '5'
+              newvalue: Others
+        - uuid: 0d4412fe781149c8bc3cf76f766b8930
+          name: 'Synology RAID health summary'
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: ok
+            - value: '2'
+              newvalue: inProgress
+            - value: '3'
+              newvalue: nonCritical
+            - value: '5'
+              newvalue: critical
+        - uuid: 53292832d70d4631872a525b2c17353b
+          name: 'Synology RAID status raw'
+          mappings:
+            - value: '1'
+              newvalue: ok
+            - value: '2'
+              newvalue: repairing
+            - value: '3'
+              newvalue: migrating
+            - value: '4'
+              newvalue: expanding
+            - value: '5'
+              newvalue: deleting
+            - value: '6'
+              newvalue: creating
+            - value: '7'
+              newvalue: raidSyncing
+            - value: '8'
+              newvalue: raidParityChecking
+            - value: '9'
+              newvalue: raidAssembling
+            - value: '10'
+              newvalue: canceling
+            - value: '11'
+              newvalue: nonCritical
+            - value: '12'
+              newvalue: critical
+            - value: '13'
+              newvalue: dataScrubbing
+            - value: '14'
+              newvalue: raidDeploying
+            - value: '15'
+              newvalue: raidUnDeploying
+            - value: '16'
+              newvalue: raidMountCache
+            - value: '17'
+              newvalue: raidUnmountCache
+            - value: '18'
+              newvalue: raidExpandingUnfinishedSHR
+            - value: '19'
+              newvalue: raidConvertSHRToPool
+            - value: '20'
+              newvalue: raidMigrateSHR1ToSHR2
+            - value: '21'
+              newvalue: unknown

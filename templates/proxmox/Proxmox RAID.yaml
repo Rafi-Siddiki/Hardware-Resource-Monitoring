@@ -1,0 +1,291 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 0f609231b71d482688fa67d37d9b3328
+      name: 'Templates/Servers Hardware'
+  templates:
+    - uuid: a3f4095a082c4e829d7a007ef8e7e96d
+      template: 'Proxmox RAID SMART'
+      name: 'Proxmox RAID SMART'
+      description: |
+        Agent-based Proxmox RAID SMART template.
+        Discovers MegaRAID physical disks from the Proxmox node using smartctl.
+        For HDDs it collects Health; for SSDs it collects Wear remaining (%).
+        Also includes a dynamic per-disk status item for a single honeycomb view.
+      vendor:
+        name: Custom
+        version: 1.0.0
+      groups:
+        - name: 'Templates/Servers Hardware'
+      discovery_rules:
+        - uuid: 24186a9eb28d488d896d49b3c1ee4bcc
+          name: 'RAID Physical Drive Discovery (Proxmox)'
+          key: raid.pd.discovery
+          delay: 1h
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discover RAID physical disks on the Proxmox node via smartctl -d megaraid,N /dev/sda.'
+          item_prototypes:
+            - uuid: 31dfd156e1db48f6840923c8089813d9
+              name: 'Physical disk [{#PDNAME}]: Dynamic status'
+              key: 'raid.pd.dynamic.status[{#SNMPINDEX}]'
+              delay: 5m
+              history: 30d
+              description: 'For HDD uses health mapping; for SSD uses wear remaining thresholds.'
+              valuemap:
+                name: 'Proxmox dynamic disk status'
+              tags:
+                - tag: Application
+                  value: 'RAID Physical Disks'
+              trigger_prototypes:
+                - uuid: e6d90b01558641ed81a09c39300adef7
+                  expression: 'last(/Proxmox RAID SMART/raid.pd.dynamic.status[{#SNMPINDEX}])>=5'
+                  name: 'Physical disk [{#PDNAME}]: FAILED/CRITICAL'
+                  priority: HIGH
+                  manual_close: 'YES'
+            - uuid: f1e9a95eadf14571a5865aa6ee2abfc9
+              name: 'Physical disk [{#PDNAME}]: Health (raw)'
+              key: 'raid.pd.health.raw[{#SNMPINDEX}]'
+              delay: 5m
+              history: 30d
+              value_type: TEXT
+              tags:
+                - tag: Application
+                  value: 'RAID Physical Disks'
+            - uuid: 880e4be2763742ce9733f2314e5277c4
+              name: 'Physical disk [{#PDNAME}]: Health'
+              key: 'raid.pd.health[{#SNMPINDEX}]'
+              delay: 5m
+              history: 30d
+              valuemap:
+                name: 'Proxmox RAID PD health'
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'var s=(value||'''').trim().toLowerCase();if(s==='''') return 0;if(s===''normal''||s===''ok''||s===''passed'') return 1;if(s.includes(''degrad'')||s.includes(''warn'')||s.includes(''prefail'')||s.includes(''pre-fail'')||s.includes(''suspect'')) return 3;return 5;'
+              tags:
+                - tag: Application
+                  value: 'RAID Physical Disks'
+              trigger_prototypes:
+                - uuid: c724d338b99b4ab5a3be0e480cefbbe9
+                  expression: 'last(/Proxmox RAID SMART/raid.pd.health[{#SNMPINDEX}])>=5'
+                  name: 'Physical disk [{#PDNAME}]: Health FAILED/CRITICAL'
+                  priority: HIGH
+                  manual_close: 'YES'
+            - uuid: a6fe65a4960d453ab236e59c5ed351f5
+              name: 'Physical disk [{#PDNAME}]: Type'
+              key: 'raid.pd.type[{#SNMPINDEX}]'
+              delay: 1h
+              history: 30d
+              value_type: TEXT
+              tags:
+                - tag: Application
+                  value: 'RAID Physical Disks'
+            - uuid: 6e9d6c0c82c24f5bba81513d992ad195
+              name: 'Physical disk {#SNMPINDEX} ({#PDNAME}): Wear remaining (%)'
+              key: 'raid.pd.wear.pct[{#SNMPINDEX}]'
+              delay: 1h
+              history: 30d
+              units: '%'
+              tags:
+                - tag: Application
+                  value: 'SSD Wear'
+                - tag: component
+                  value: storage
+                - tag: metric
+                  value: wear
+              trigger_prototypes:
+                - uuid: dc68dc6a4ca846f690c335aa6673030e
+                  expression: 'last(/Proxmox RAID SMART/raid.pd.wear.pct[{#SNMPINDEX}])<{$SSD_WEAR_WARN}'
+                  name: 'Physical disk [{#PDNAME}]: SSD wear below {$SSD_WEAR_WARN}%'
+                  priority: WARNING
+                  manual_close: 'YES'
+            - uuid: 67585b576d2d4362958acb970c678b65
+              name: 'Physical disk [{#PDNAME}]: Wear'
+              key: 'raid.pd.wear[{#SNMPINDEX}]'
+              delay: 1h
+              history: 30d
+              value_type: TEXT
+              tags:
+                - tag: Application
+                  value: 'RAID Physical Disks'
+          overrides:
+            - name: 'Disable SSD wear items for non-SSD drives'
+              step: '1'
+              filter:
+                evaltype: AND
+                conditions:
+                  - macro: '{#PDTYPE}'
+                    value: ^SSD$
+                    operator: NOT_MATCHES_REGEX
+              operations:
+                - value: 'raid.pd.wear.pct[{#SNMPINDEX}]'
+                  status: DISABLED
+                - value: 'raid.pd.wear[{#SNMPINDEX}]'
+                  status: DISABLED
+            - name: 'Disable HDD health items for SSD drives'
+              step: '2'
+              filter:
+                evaltype: AND
+                conditions:
+                  - macro: '{#PDTYPE}'
+                    value: ^SSD$
+              operations:
+                - value: 'raid.pd.health.raw[{#SNMPINDEX}]'
+                  status: DISABLED
+                - value: 'raid.pd.health[{#SNMPINDEX}]'
+                  status: DISABLED
+      macros:
+        - macro: '{$SSD_WEAR_OK}'
+          value: '40'
+        - macro: '{$SSD_WEAR_WARN}'
+          value: '30'
+      dashboards:
+        - uuid: 72a83d97296f49e3af82050a17547026
+          name: Overview
+          pages:
+            - name: Discoveries
+              display_period: '30'
+              widgets:
+                - type: honeycomb
+                  name: 'Physical disks (Dynamic)'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: items.0
+                      value: 'Physical disk *: Dynamic status'
+                    - type: STRING
+                      name: primary_label
+                      value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+                    - type: INTEGER
+                      name: primary_label_size_type
+                      value: '1'
+                    - type: STRING
+                      name: reference
+                      value: PRX01
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: 9E9E9E
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: 069C56
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: FF980E
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '3'
+                    - type: STRING
+                      name: thresholds.3.color
+                      value: D3212C
+                    - type: STRING
+                      name: thresholds.3.threshold
+                      value: '5'
+                - type: honeycomb
+                  name: 'SSD wear remaining'
+                  'y': '4'
+                  width: '72'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: items.0
+                      value: 'Physical disk *: Wear remaining (%)'
+                    - type: STRING
+                      name: primary_label
+                      value: '{{ITEM.NAME}.regsub("^Physical disk ([0-9]+) \((.*?)\): Wear remaining \(\%\)$", "\2")}'
+                    - type: INTEGER
+                      name: primary_label_size_type
+                      value: '1'
+                    - type: STRING
+                      name: reference
+                      value: PRX03
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: D3212C
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: FEC400
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '30'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: 069C56
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '40'
+                - type: honeycomb
+                  name: 'HDD health'
+                  x: '36'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: items.0
+                      value: 'Physical disk *: Health'
+                    - type: STRING
+                      name: primary_label
+                      value: '{{ITEM.NAME}.regsub("\[(.*?)\]", "\1")}'
+                    - type: INTEGER
+                      name: primary_label_size_type
+                      value: '1'
+                    - type: STRING
+                      name: reference
+                      value: PRX02
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: 9E9E9E
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: 069C56
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: FF980E
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '3'
+                    - type: STRING
+                      name: thresholds.3.color
+                      value: D3212C
+                    - type: STRING
+                      name: thresholds.3.threshold
+                      value: '5'
+      valuemaps:
+        - uuid: d27208c4cbd647cdbb43cbc720d39d22
+          name: 'Proxmox dynamic disk status'
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: ok
+            - value: '3'
+              newvalue: nonCritical
+            - value: '5'
+              newvalue: critical
+        - uuid: e8b8cab5b6ad4d7085d58994479d8373
+          name: 'Proxmox RAID PD health'
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: ok
+            - value: '3'
+              newvalue: nonCritical
+            - value: '5'
+              newvalue: critical
