@@ -1,4 +1,4 @@
-# Zabbix Infrastructure Monitoring
+# Hardware Resource Monitoring
 
 ![Screenshot](images/image5.png)
 
