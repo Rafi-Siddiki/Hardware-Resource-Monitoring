@@ -4,55 +4,34 @@
 
 A production-oriented collection of **Zabbix 7.4 hardware monitoring templates** for mixed infrastructure environments.
 
-This repository documents and packages a monitoring setup built around this workflow:
+> **Core workflow:** Read vendor MIBs -> identify useful OIDs -> build Zabbix templates -> normalize statuses into a shared numeric model -> display them consistently in dashboards and honeycomb tiles.
 
-> **Read vendor MIBs -> identify useful OIDs -> build Zabbix templates -> normalize statuses into a shared numeric model -> display them consistently in dashboards and honeycomb tiles.**
+---
 
-It combines:
+## 📌 At a glance
+
+This repository combines:
 
 - **SNMP-based vendor templates** for Dell, HPE, IBM, Lenovo, and Synology
 - **Agent-based Proxmox RAID monitoring** for MegaRAID-backed disks and arrays
-- **Normalized value mapping** so dashboard tiles can use consistent color logic
+- **Normalized value mapping** for consistent dashboard colors and meanings
 - **Discovery-heavy monitoring** for disks, RAID, power, fans, memory, CPU, and other hardware components
 
----
+### Supported monitoring paths
 
-## What is a monitoring tool?
-
-A monitoring tool is a platform that continuously checks the health, status, and behavior of infrastructure components such as:
-
-- servers
-- disks and RAID controllers
-- fans, PSUs, and temperature sensors
-- memory and CPU
-- network interfaces
-- storage appliances and NAS devices
-
-Instead of engineers manually logging into each device and checking hardware one by one, a monitoring tool collects the data centrally, evaluates it, and highlights what is healthy, degraded, or failed.
-
-In this repository, **Zabbix** is the monitoring platform used to collect hardware data through **SNMP** and **Zabbix Agent 2**.
+| Monitoring path | Source | Main purpose |
+|---|---|---|
+| Vendor hardware monitoring | SNMP / SNMPv3 | BMC, RAID, PSU, fan, memory, CPU, temp, sensors |
+| Proxmox RAID disk monitoring | Zabbix Agent 2 + `smartctl` | SSD wear, HDD SMART health |
+| Proxmox RAID array monitoring | Zabbix Agent 2 + `StorCLI` / `PercCLI` | Physical disk RAID state, virtual drive RAID state |
 
 ---
 
-## Why monitoring is needed
+## 🎯 Why this repository exists
 
-In our current environment, hardware checks often have to be done **manually** across multiple devices and vendors.
+The main reason for building this setup was simple:
 
-That creates several operational problems:
-
-- it is **time-consuming**
-- it is **error-prone**
-- it depends too much on **manual effort**
-- it is difficult to maintain a **consistent checking process**
-- hardware issues can be **missed or noticed late**
-
-When the process is manual, teams usually need to open each server interface, review health states, compare disk or RAID conditions, and repeat the same work again and again. As the environment grows, this becomes harder to sustain.
-
----
-
-## Existing problem statement
-
-The main reason for building this setup was simple: **the company should not need to manually check every single hardware component every time it wants to confirm system health.**
+> **The company should not need to manually check every single hardware component every time it wants to confirm system health.**
 
 Before this monitoring approach:
 
@@ -69,11 +48,44 @@ This repository solves that by creating a structured monitoring approach where Z
 - show clear dashboard colors and tiles
 - reduce manual checking effort
 
-So the value of this repository is not only in the templates themselves - it is in turning a **manual hardware validation process** into a more **automated, repeatable, and operationally useful monitoring system**.
+So the value of this repository is not only in the templates themselves — it is in turning a **manual hardware validation process** into a more **automated, repeatable, and operationally useful monitoring system**.
 
 ---
 
-## Project start and deployment approach
+## 🧭 What is a monitoring tool?
+
+A monitoring tool is a platform that continuously checks the health, status, and behavior of infrastructure components such as:
+
+- servers
+- disks and RAID controllers
+- fans, PSUs, and temperature sensors
+- memory and CPU
+- network interfaces
+- storage appliances and NAS devices
+
+Instead of engineers manually logging into each device and checking hardware one by one, a monitoring tool collects the data centrally, evaluates it, and highlights what is healthy, degraded, or failed.
+
+In this repository, **Zabbix** is the monitoring platform used to collect hardware data through **SNMP** and **Zabbix Agent 2**.
+
+---
+
+## 🚨 Why monitoring is needed
+
+In the current environment, hardware checks often have to be done **manually** across multiple devices and vendors.
+
+That creates several operational problems:
+
+- it is **time-consuming**
+- it is **error-prone**
+- it depends too much on **manual effort**
+- it is difficult to maintain a **consistent checking process**
+- hardware issues can be **missed or noticed late**
+
+As the environment grows, repeated manual checking becomes harder to sustain. This repository was built to replace that with a more structured, automated approach.
+
+---
+
+## 🏗️ Project start and deployment approach
 
 When this project started, the first design decision was to run **Zabbix inside a container on a virtual machine**.
 
@@ -94,32 +106,11 @@ This repository should therefore be understood not only as a template collection
 
 ---
 
-## Why this repository exists
-
-Zabbix hardware monitoring often becomes messy in real environments because each vendor exposes:
-
-- different MIB trees
-- different status texts and numeric values
-- different discovery patterns
-- different dashboard behavior
-- different levels of built-in Zabbix template support
-
-The goal of this repo is to make those templates **portable, understandable, and reusable**.
-
-This repo is especially useful if you want:
-
-- a **single place** to keep your Zabbix hardware templates
-- a **repeatable process** for importing and maintaining templates
-- **dashboard-friendly state normalization** across different vendors
-- a clean GitHub repository you can extend over time
-
----
-
-## Template development journey
+## 🛠️ Template development journey
 
 One of the main practical challenges during this project was hardware template availability.
 
-In our data center, one of the most common server models is the **Lenovo SR650**. Zabbix did not provide a built-in template that matched our needs for this hardware, so the initial plan of simply importing an official template was not possible.
+In the data center, one of the most common server models is the **Lenovo SR650**. Zabbix did not provide a built-in template that matched the monitoring needs for this hardware, so the initial plan of simply importing an official template was not possible.
 
 ### What happened first
 
@@ -127,10 +118,10 @@ The first step was to search online for an existing Lenovo community template. O
 
 ### Why that was not enough
 
-Although that template was helpful as a starting point, it was **not suitable enough for our environment and monitoring requirements**. In practice, that meant:
+Although that template was helpful as a starting point, it was **not suitable enough for the environment and monitoring requirements**. In practice, that meant:
 
-- the available items were incomplete for our needs
-- the structure was not aligned with the dashboard style we wanted
+- the available items were incomplete
+- the structure was not aligned with the desired dashboard style
 - the extracted values were not consistent enough for unified visual monitoring
 - it did not fully solve the problem of cross-vendor status consistency
 
@@ -138,17 +129,17 @@ Although that template was helpful as a starting point, it was **not suitable en
 
 Because of that, the template work had to move from simple reuse to actual template engineering.
 
-The workflow became:
+### Practical workflow
 
-1. inspect the vendor **MIB tree**
-2. browse the MIB structure using the **Observium MIB browser / database**
-3. identify the useful OIDs required for monitoring
-4. test and validate which values were operationally meaningful
-5. build Zabbix items, discovery rules, value maps, and dashboards from those OIDs
+1. Inspect the vendor **MIB tree**
+2. Browse the structure using the **Observium MIB browser / database**
+3. Identify the useful OIDs required for monitoring
+4. Test and validate which values are operationally meaningful
+5. Build Zabbix items, discovery rules, value maps, and dashboards from those OIDs
 
 ### AI-assisted template building
 
-To speed up the template creation process, **AI was used as an accelerator**, especially for:
+AI was used as an accelerator for:
 
 - generating template YAML structure faster
 - building discovery prototypes more quickly
@@ -158,18 +149,17 @@ To speed up the template creation process, **AI was used as an accelerator**, es
 
 AI made the process faster, but the monitoring logic still depended on:
 
-- understanding the vendor MIBs
+- understanding vendor MIBs
 - validating OIDs manually
 - checking extracted values against actual device behavior
-- aligning value maps so dashboards would stay visually consistent
+- aligning value maps so dashboards stay visually consistent
 
-So this project was not simply "generate a template and import it". It was a structured process of:
-
-> **finding the correct MIB path, selecting useful OIDs, validating outputs, and then shaping the result into dashboard-friendly templates.**
+> This project was not simply “generate a template and import it.”  
+> It was a structured process of finding the correct MIB path, selecting useful OIDs, validating outputs, and shaping the result into dashboard-friendly templates.
 
 ---
 
-## Monitoring approach
+## 🔍 Monitoring approach
 
 ### 1. SNMP templates for vendor hardware
 
@@ -190,24 +180,30 @@ For Proxmox RAID-backed disks, SNMP alone is not always enough. In this setup:
 - the script uses **`smartctl`** for per-disk SMART data and SSD wear information
 - the script uses **StorCLI / PercCLI** for RAID controller, physical-disk state, and virtual-drive state
 - `zabbix-agent2` exposes the data through `UserParameter`
-- Zabbix discovers disks and RAID virtual drives and shows **HDD health**, **SSD wear**, **physical disk RAID state**, and **virtual drive RAID state** in a unified way
+- Zabbix discovers disks and RAID virtual drives and shows:
+  - **HDD health**
+  - **SSD wear**
+  - **physical disk RAID state**
+  - **virtual drive RAID state**
 
 ### 3. Shared dashboard semantics
 
-Where possible, templates normalize component states into a common dashboard model such as:
+Where possible, templates normalize component states into a common dashboard model:
 
-- `0` = Unknown / not available
-- `1` = OK / normal / online
-- `2` = Spare / standby / unused where applicable
-- `3` = Warning / degraded
-- `4` = Rebuilding / in progress
-- `5` = Failed / critical / offline
+| Value | Meaning |
+|---|---|
+| `0` | Unknown / not available |
+| `1` | OK / normal / online |
+| `2` | Spare / standby / unused where applicable |
+| `3` | Warning / degraded |
+| `4` | Rebuilding / in progress |
+| `5` | Failed / critical / offline |
 
-That makes it much easier to build **consistent tiles and honeycomb views** across vendors.
+This shared model makes it much easier to build **consistent tiles and honeycomb views** across vendors.
 
 ---
 
-## Repository structure
+## 🧱 Repository structure
 
 ```text
 zabbix-hardware-monitoring/
@@ -244,21 +240,21 @@ zabbix-hardware-monitoring/
 
 ---
 
-## Included templates
+## 📦 Included templates
 
 | Vendor / Platform | Method | Main coverage |
 |---|---|---|
-| Dell PowerEdge R720 | SNMP | System health, controllers, virtual disks, physical disks, fan/temperature/power |
-| Dell PowerEdge R740 | SNMP | System health, controllers, virtual disks, physical disks, fan/temperature/power |
+| Dell PowerEdge R720 | SNMP | System health, controllers, virtual disks, physical disks, fan / temperature / power |
+| Dell PowerEdge R740 | SNMP | System health, controllers, virtual disks, physical disks, fan / temperature / power |
 | HPE ProLiant DL380 | SNMP | Unified health model, array cache, controllers, disks, network adapters, fans |
-| IBM IMM | SNMPv3 | System health, storage pools, RAID PD/VD, PSU, temp, fan, SSD wear |
+| IBM IMM | SNMPv3 | System health, storage pools, RAID PD/VD, PSU, temperature, fan, SSD wear |
 | Lenovo XCC | SNMPv3 | Hardware, PSU, fan, memory, CPU, firmware, RAID PD/VD, SSD wear |
 | Synology NAS | SNMP | System, disks, RAID health, temperature, fans, DSM info, SSD wear |
-| Proxmox RAID SMART | Agent2 + smartctl + StorCLI | MegaRAID disk discovery, VD discovery, HDD health, SSD wear, PD state, VD state, dynamic status |
+| Proxmox RAID SMART | Agent2 + `smartctl` + `StorCLI` | MegaRAID disk discovery, VD discovery, HDD health, SSD wear, PD state, VD state, dynamic status |
 
 ---
 
-## Get Zabbix up and running
+## 🚀 Get Zabbix up and running
 
 ```bash
 git clone https://github.com/Rafi-Siddiki/zabbix-infrastructure-monitoring.git
@@ -266,33 +262,28 @@ cd zabbix-infrastructure-monitoring/docker/
 docker compose up -d
 ```
 
-### Log into Zabbix using
+### Default login
 
-**Username**
-```text
-Admin
-```
-
-**Password**
-```text
-zabbix
-```
+| Field | Value |
+|---|---|
+| Username | `Admin` |
+| Password | `zabbix` |
 
 ---
 
-## Key design decisions
+## ✅ Key design decisions
 
-### Value normalization for dashboard colors
+### 1. Value normalization for dashboard colors
 
 Different vendors report different states. This repository maps them into predictable dashboard values so tiles can use a common visual language:
 
-- Green -> OK / normal / online
-- Blue -> hot-spare / unconfigured-good / standby / healthy non-active role
-- Yellow / orange -> warning / degraded / rebuilding
-- Red -> failed / critical / offline
-- Gray -> unknown / unavailable
+- 🟩 **Green** -> OK / normal / online
+- 🟦 **Blue** -> hot-spare / unconfigured-good / standby / healthy non-active role
+- 🟨 **Yellow / orange** -> warning / degraded / rebuilding
+- 🟥 **Red** -> failed / critical / offline
+- ⬜ **Gray** -> unknown / unavailable
 
-### Discovery-first design
+### 2. Discovery-first design
 
 Low-level discovery is heavily used for:
 
@@ -305,11 +296,11 @@ Low-level discovery is heavily used for:
 - network adapters
 - firmware blocks
 
-### Separation of vendor logic and dashboard logic
+### 3. Separation of vendor logic and dashboard logic
 
 Vendor-specific logic stays inside each template, while normalized items make dashboards easier to share and maintain.
 
-### Consistent value mapping for unified dashboards
+### 4. Consistent value mapping for unified dashboards
 
 One important design goal in this project was to keep dashboard semantics as consistent as possible across vendors.
 
@@ -323,186 +314,210 @@ This is especially important in mixed environments where Dell, HPE, Lenovo, IBM,
 
 ---
 
-## Value mapping model: the most important concept
+# 🧠 Value mapping model: the most important concept
 
-This section is the key to understanding how the dashboards work.
+This is the most important section for understanding how the dashboards work.
 
-### 1. Raw vendor mapping vs unified mapping
+## 1. Raw vendor mapping vs unified mapping
 
 Many templates contain **raw vendor items** and **normalized dashboard items**.
 
-That distinction matters.
-
-#### Raw vendor item
+### Raw vendor item
 A raw vendor item shows the vendor’s original meaning exactly as reported by SNMP or the controller CLI.
 
 Examples:
+
 - Dell virtual disk state from iDRAC
 - HPE logical drive status from `cpqDaLogDrvStatus`
 - StorCLI raw physical disk state like `Onln` or `Rbld`
 
-These raw values are important for:
+Raw vendor values are important for:
+
 - troubleshooting
 - confirming the original source data
 - understanding device-native terminology
 
-#### Unified dashboard item
+### Unified dashboard item
 A unified dashboard item translates the raw vendor meaning into a shared numeric model that can be used consistently across dashboards.
 
 Examples:
+
 - `1 = Online`
 - `3 = Degraded`
 - `5 = Failed`
 
 These normalized items are what should be used in shared dashboard widgets.
 
-**Important rule:**
-Do not assume every raw vendor value already follows the shared dashboard model. In several templates, the shared model is implemented through a dependent item or a preprocessing step.
+> **Important rule**  
+> Do not assume every raw vendor value already follows the shared dashboard model.  
+> In several templates, the shared model is implemented through a dependent item or preprocessing step.
 
-### 2. Physical disk state vs virtual drive state vs severity
+---
+
+## 2. Physical disk state vs virtual drive state vs severity
 
 These three concepts are different and should not be mixed.
 
-#### A. Physical disk state
+### A. Physical disk state
 This describes the state or role of **one member disk** behind a RAID controller.
 
-Recommended shared model:
+#### Recommended shared model
 
-- `0` = Unknown
-- `1` = Online
-- `2` = Hot spare
-- `3` = Unconfigured good
-- `4` = Rebuilding
-- `5` = Offline / Failed / Missing
+| Value | Meaning |
+|---|---|
+| `0` | Unknown |
+| `1` | Online |
+| `2` | Hot spare |
+| `3` | Unconfigured good |
+| `4` | Rebuilding |
+| `5` | Offline / Failed / Missing |
 
 This model is appropriate because a single physical disk can be:
+
 - online
 - spare
 - good but unused
 - rebuilding
 - failed
 
-#### B. Virtual drive state
+### B. Virtual drive state
 This describes the state of the **whole RAID logical volume**.
 
-Recommended shared model:
+#### Recommended shared model
 
-- `0` = Unknown
-- `1` = Online / Optimal
-- `3` = Degraded
-- `4` = Rebuilding / recovering / operations in progress where you choose to treat them as warning-progress states
-- `5` = Failed / Offline
+| Value | Meaning |
+|---|---|
+| `0` | Unknown |
+| `1` | Online / Optimal |
+| `3` | Degraded |
+| `4` | Rebuilding / recovery / operation in progress |
+| `5` | Failed / Offline |
 
 This model is different from physical disk state because a virtual drive cannot meaningfully be a hot-spare or unconfigured-good member role.
 
-#### C. Severity / health status
+### C. Severity / health status
 This is the dashboard-friendly summary status used for health and dynamic items.
 
-Recommended shared model:
+#### Recommended shared model
 
-- `0` = Unknown
-- `1` = OK
-- `3` = nonCritical / Warning
-- `4` = Rebuilding / in progress (optional, only if the item family uses it)
-- `5` = Critical / Failed
+| Value | Meaning |
+|---|---|
+| `0` | Unknown |
+| `1` | OK |
+| `3` | nonCritical / Warning |
+| `4` | Rebuilding / in progress *(optional, only if the item family uses it)* |
+| `5` | Critical / Failed |
 
 This type is suitable for:
+
 - SMART health
 - dynamic health summaries
-- controller-derived warning/critical items
+- controller-derived warning / critical items
 
-### 3. Why physical disk and virtual drive states must stay separate
+---
+
+## 3. Why physical disk and virtual drive states must stay separate
 
 A single disk can fail while the whole array is still only degraded.
 
-Example:
-- one physical disk fails -> **physical disk state = 5**
-- the RAID5 virtual drive is still accessible but degraded -> **virtual drive state = 3**
+### Example
+
+- one physical disk fails -> **physical disk state = `5`**
+- the RAID5 virtual drive is still accessible but degraded -> **virtual drive state = `3`**
 
 That is correct and expected.
 
 If those two layers are mixed into one value map, dashboards become misleading.
 
-So the correct design is:
+### Correct design
 
 - **Physical disk items** -> use the physical disk state map
 - **Virtual drive items** -> use the virtual drive state map
 - **Health / dynamic items** -> use the severity map
 
-### 4. How Proxmox fits into this model
+---
 
-The Proxmox RAID template uses the shared model in the following way:
+## 4. How Proxmox fits into this model
 
-#### SMART / wear side
+The Proxmox RAID template uses the shared model in the following way.
+
+### SMART / wear side
 Collected from:
+
 - `smartctl`
 
 Used for:
+
 - SSD wear remaining
 - HDD SMART health
 - SMART-based dynamic status
 
-#### RAID controller side
+### RAID controller side
 Collected from:
-- StorCLI / PercCLI
+
+- `StorCLI` / `PercCLI`
 
 Used for:
+
 - physical disk RAID state
 - virtual drive RAID state
 - controller-derived RAID dynamic status
 
 That means the Proxmox template is intentionally split into:
+
 - a **disk health / wear** branch
 - a **RAID state** branch
 
 This is not duplication. It is a deliberate design decision.
 
-### 5. How to speak about this in architecture terms
+---
 
-The clean explanation is:
+## 5. Architecture explanation in one sentence
 
 > The repository preserves vendor-native source items for troubleshooting, but it builds normalized items for shared dashboards. Physical disk state, virtual drive state, and severity are treated as separate monitoring concepts because they represent different layers of RAID behavior.
 
-That is the correct explanation to use in reviews and technical discussions.
-
 ---
 
-## Proxmox RAID SMART setup
+# 💽 Proxmox RAID SMART setup
 
 The Proxmox part of this repository expects a custom script and `zabbix-agent2` configuration on the Linux host.
 
-### Dependency summary
+## Dependency summary
 
-The Proxmox RAID monitoring method depends on:
+| Dependency | Why it is needed |
+|---|---|
+| `zabbix-agent2` | exposes custom monitoring items |
+| `smartmontools` | provides `smartctl` for SMART data and SSD wear |
+| `sudo` | allows the Zabbix user to run the script safely |
+| `python3` | used by the script for JSON parsing / escaping |
+| `StorCLI` or `PercCLI` | provides RAID controller, PD state, and VD state data |
 
-- `zabbix-agent2`
-- `smartmontools`
-- `sudo`
-- `python3`
-- `StorCLI` or `PercCLI`
+---
 
-### Why both smartctl and StorCLI are required
+## Why both `smartctl` and `StorCLI` are required
 
 This setup uses **two different data sources** on purpose.
 
-#### `smartctl`
+### `smartctl`
 Used for:
+
 - per-disk SMART data
 - SSD wear / endurance information
 - HDD SMART health
 - vendor-specific disk-level attributes
 
-#### `StorCLI` / `PercCLI`
+### `StorCLI` / `PercCLI`
 Used for:
+
 - RAID controller visibility
 - physical disk RAID state
 - virtual drive RAID state
 - fast controller-driven discovery of arrays and member states
 
-**Important:**
-`smartctl` alone is not enough for reliable RAID virtual-drive state.
-`StorCLI` alone is not enough for vendor-specific SMART wear interpretation.
-Both are required to provide the full monitoring model.
+> **Important**  
+> `smartctl` alone is not enough for reliable RAID virtual-drive state.  
+> `StorCLI` alone is not enough for vendor-specific SMART wear interpretation.  
+> Both are required to provide the full monitoring model.
 
 ---
 
@@ -521,30 +536,32 @@ sudo apt install zabbix-agent2 smartmontools sudo python3 unzip -y
 Download the Linux StorCLI package from Broadcom for your controller family.
 
 #### Step 2: extract the archive
+
 ```bash
 unzip <Broadcom_StorCLI_package>.zip
 cd <extracted_directory>
 ```
 
 #### Step 3: find the Debian package
-The Linux bundle usually contains packages for multiple distributions. Use the Debian package for Debian/Ubuntu/Proxmox systems.
 
-Example:
 ```bash
 find . -type f \( -name "*.deb" -o -name "storcli64" \)
 ```
 
 #### Step 4: install the `.deb` package
+
 ```bash
 sudo dpkg -i ./<storcli_package>.deb
 ```
 
 If dependency resolution is needed:
+
 ```bash
 sudo apt -f install -y
 ```
 
 #### Step 5: verify installation
+
 ```bash
 /opt/MegaRAID/storcli/storcli64 show
 ```
@@ -562,6 +579,7 @@ sudo yum install -y zabbix-agent2 smartmontools sudo python3 unzip
 ```
 
 For newer distributions that use `dnf`:
+
 ```bash
 sudo dnf install -y zabbix-agent2 smartmontools sudo python3 unzip
 ```
@@ -572,17 +590,20 @@ sudo dnf install -y zabbix-agent2 smartmontools sudo python3 unzip
 Download the Linux StorCLI package from Broadcom for your controller family.
 
 #### Step 2: extract the archive
+
 ```bash
 unzip <Broadcom_StorCLI_package>.zip
 cd <extracted_directory>
 ```
 
 #### Step 3: install the RPM package
+
 ```bash
 sudo rpm -ivh <StorCLI-*.rpm>
 ```
 
 #### Step 4: verify installation
+
 ```bash
 /opt/MegaRAID/storcli/storcli64 show
 ```
@@ -611,7 +632,7 @@ Expected content:
 zabbix ALL=(ALL) NOPASSWD: /usr/local/bin/proxmox_raid_pd_attr.sh
 ```
 
-Then set correct permission:
+Then set the correct permission:
 
 ```bash
 sudo chmod 440 /etc/sudoers.d/zabbix-smart-raid
@@ -633,9 +654,10 @@ sudo nano /etc/zabbix/zabbix_agent2.d/proxmox-raid-smart.conf
 - use only one custom include file for the RAID keys to avoid duplicate `UserParameter` definitions
 - confirm `Timeout` stays within the valid range supported by your Zabbix agent version
 - if the agent fails to start, test with:
-  ```bash
-  sudo /usr/sbin/zabbix_agent2 -f -c /etc/zabbix/zabbix_agent2.conf
-  ```
+
+```bash
+sudo /usr/sbin/zabbix_agent2 -f -c /etc/zabbix/zabbix_agent2.conf
+```
 
 ---
 
@@ -687,7 +709,7 @@ sudo ss -tulpn | grep :10050
 
 Before adding a device in the Zabbix UI, the most important prerequisite is that the device must already be prepared for monitoring.
 
-### Step 0: Create an SNMP monitoring account on the device
+### Step 0: create an SNMP monitoring account on the device
 
 For SNMP-based monitoring, you first need to create or enable an **SNMP monitoring account / SNMP configuration** on the server, appliance, or management controller.
 
@@ -711,15 +733,6 @@ Examples:
 - Synology DSM SNMP setup is different from server BMC interfaces
 - HPE iLO / SNMP process differs again
 
-So the real onboarding flow is usually:
-
-1. identify the device vendor and model
-2. search for the proper SNMP enablement process for that device
-3. create the monitoring account or configure SNMP community / SNMPv3 user
-4. confirm network reachability from Zabbix to the target
-5. test SNMP access
-6. then add the host in Zabbix
-
 ### Recommended preparation checklist
 
 Before creating the host in Zabbix, make sure you know:
@@ -733,31 +746,27 @@ Before creating the host in Zabbix, make sure you know:
 
 ---
 
+## Host onboarding in the Zabbix UI
+
 ### 1. Navigate to **Data collection -> Hosts**
 
 ![Screenshot](images/image1.png)
-
----
 
 ### 2. Click **Create host**
 
 ![Screenshot](images/image2.png)
 
----
-
 ### 3. Fill in the basic host information
 
 Provide the following carefully:
 
-1. **Hostname** - must be unique for every device
-2. **Visible name** - the display name you want shown in Zabbix
-3. **Template** - select the correct vendor template from this repository
-4. **Host group** - choose a group that makes filtering easier later (for example: Lenovo Servers, Dell Servers, NAS, Proxmox)
-5. **Interface type** - choose the required interface type, most commonly **SNMP** for these templates
+1. **Hostname** — must be unique for every device
+2. **Visible name** — the display name shown in Zabbix
+3. **Template** — select the correct vendor template from this repository
+4. **Host group** — choose a group that makes filtering easier later
+5. **Interface type** — choose the required interface type, most commonly **SNMP**
 
 ![Screenshot](images/image3.png)
-
----
 
 ### 4. Fill in the SNMP interface details
 
@@ -769,8 +778,6 @@ Enter the required SNMP fields according to the SNMP version used by the device:
 Make sure the SNMP settings entered in Zabbix match exactly what was configured on the device.
 
 ![Screenshot](images/image4.png)
-
----
 
 ### 5. Validate after adding the host
 
@@ -784,7 +791,7 @@ After saving the host:
 
 ---
 
-## Maintainer note
+## 📝 Maintainer note
 
 This repository reflects a practical hardware monitoring implementation where templates were developed by:
 
