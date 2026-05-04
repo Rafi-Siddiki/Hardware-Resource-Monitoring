@@ -1,1 +1,1200 @@
+zabbix_export:
+  version: '6.0'
+  date: '2026-05-04T00:00:00Z'
+  groups:
+  - uuid: 921eb47671a2485e88d592c7a49b4e44
+    name: Templates/Storage
+  templates:
+  - uuid: e8b8b02992d24c8ea891e4fa0e90ffa2
+    template: Template PercCLI RAID SSH Password Components v2
+    name: Template PercCLI RAID SSH Password Components v2
+    description: |-
+      PercCLI RAID monitoring via Zabbix SSH agent using username/password authentication.
+      Creates individual discovered items for physical disks, SSD life remaining, HDD health, virtual drives, controller health, BBU status, and predictive failure counts.
+      Uses cd into perccli directory before running ./perccli so libstorelib.so is found.
 
+      V2: unique template name, LLD returns {data:[...]}, includes individual disk, SSD, HDD, and virtual-drive item prototypes.
+
+      V3 fix: robust physical disk/SSD/HDD/VD discovery and state parsers using YAML literal JavaScript blocks to avoid regex line-wrap import issues.
+    groups:
+    - name: Templates/Storage
+    items:
+    - uuid: f727b88336d44ecdb3a6b25de5ea1f35
+      name: 'PercCLI: Physical disk raw'
+      type: SSH
+      key: ssh.run[perccli.pd.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+      delay: 5m
+      history: 1d
+      trends: '0'
+      value_type: TEXT
+      params: cd {$PERC.CLI.DIR} && {$PERC.SUDO} {$PERC.CLI.BIN} /c{$PERC.CONTROLLER} /eall /sall show
+      authtype: PASSWORD
+      username: '{$PERC.SSH.USER}'
+      password: '{$PERC.SSH.PASSWORD}'
+      timeout: '{$PERC.SSH.TIMEOUT}'
+      tags:
+      - tag: component
+        value: raw
+      - tag: scope
+        value: storage
+    - uuid: f6995b6c7eae46c69c41983defa92a9b
+      name: 'PercCLI: SMART raw'
+      type: SSH
+      key: ssh.run[perccli.smart.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+      delay: 15m
+      history: 1d
+      trends: '0'
+      value_type: TEXT
+      params: cd {$PERC.CLI.DIR} && {$PERC.SUDO} {$PERC.CLI.BIN} /c{$PERC.CONTROLLER} /eall /sall show smart
+      authtype: PASSWORD
+      username: '{$PERC.SSH.USER}'
+      password: '{$PERC.SSH.PASSWORD}'
+      timeout: '{$PERC.SSH.TIMEOUT}'
+      tags:
+      - tag: component
+        value: raw
+      - tag: scope
+        value: storage
+    - uuid: 22acd0db6afd4b59be73122532393f3f
+      name: 'PercCLI: Physical disk full raw'
+      type: SSH
+      key: ssh.run[perccli.pd.all.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+      delay: 10m
+      history: 1d
+      trends: '0'
+      value_type: TEXT
+      params: cd {$PERC.CLI.DIR} && {$PERC.SUDO} {$PERC.CLI.BIN} /c{$PERC.CONTROLLER} /eall /sall show all
+      authtype: PASSWORD
+      username: '{$PERC.SSH.USER}'
+      password: '{$PERC.SSH.PASSWORD}'
+      timeout: '{$PERC.SSH.TIMEOUT}'
+      tags:
+      - tag: component
+        value: raw
+      - tag: scope
+        value: storage
+    - uuid: 7414354ce91c467f91b3c183f3f8d52d
+      name: 'PercCLI: Virtual drive raw'
+      type: SSH
+      key: ssh.run[perccli.vd.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+      delay: 5m
+      history: 1d
+      trends: '0'
+      value_type: TEXT
+      params: cd {$PERC.CLI.DIR} && {$PERC.SUDO} {$PERC.CLI.BIN} /c{$PERC.CONTROLLER} /vall show
+      authtype: PASSWORD
+      username: '{$PERC.SSH.USER}'
+      password: '{$PERC.SSH.PASSWORD}'
+      timeout: '{$PERC.SSH.TIMEOUT}'
+      tags:
+      - tag: component
+        value: raw
+      - tag: scope
+        value: storage
+    - uuid: 820c00f74e02478f8a6eddd170dbd266
+      name: 'PercCLI: Controller raw'
+      type: SSH
+      key: ssh.run[perccli.controller.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+      delay: 5m
+      history: 1d
+      trends: '0'
+      value_type: TEXT
+      params: cd {$PERC.CLI.DIR} && {$PERC.SUDO} {$PERC.CLI.BIN} show
+      authtype: PASSWORD
+      username: '{$PERC.SSH.USER}'
+      password: '{$PERC.SSH.PASSWORD}'
+      timeout: '{$PERC.SSH.TIMEOUT}'
+      tags:
+      - tag: component
+        value: raw
+      - tag: scope
+        value: storage
+    - uuid: cc0ccfa537e1422b8a1322118b755c09
+      name: 'PercCLI: Total predictive failure count'
+      type: SSH
+      key: ssh.run[perccli.predictive_failure.total,{HOST.CONN},{$PERC.SSH.PORT}]
+      delay: 10m
+      history: 1d
+      trends: 365d
+      value_type: UNSIGNED
+      params: cd {$PERC.CLI.DIR} && {$PERC.SUDO} {$PERC.CLI.BIN} /c{$PERC.CONTROLLER} /eall /sall show all | awk -F= '/Predictive Failure Count/ {sum += $2} END {print sum+0}'
+      authtype: PASSWORD
+      username: '{$PERC.SSH.USER}'
+      password: '{$PERC.SSH.PASSWORD}'
+      timeout: '{$PERC.SSH.TIMEOUT}'
+      tags:
+      - tag: component
+        value: raw
+      - tag: scope
+        value: storage
+      triggers:
+      - uuid: 8c3b9ee0a0f548e996327c14c1f89bc1
+        expression: last(/Template PercCLI RAID SSH Password Components v2/ssh.run[perccli.predictive_failure.total,{HOST.CONN},{$PERC.SSH.PORT}])>0
+        name: 'PercCLI: Predictive failure detected on at least one disk'
+        priority: HIGH
+        tags:
+        - tag: scope
+          value: availability
+    - uuid: 2b7183cb2a0147a2aca08650d75f95dd
+      name: 'PercCLI: Virtual drive overall health'
+      type: DEPENDENT
+      key: perccli.vd.overall_health
+      history: 30d
+      valuemap:
+        name: PercCLI Health Status
+      preprocessing:
+      - type: JAVASCRIPT
+        parameters:
+        - |
+          var lines = value.split(/\r?\n/);
+          var worst = 1;
+          var found = false;
+
+          function vdStateCode(state) {
+              switch (state) {
+                  case "Optl":
+                      return 1;   // Healthy
+                  case "Pdgd":
+                  case "Dgrd":
+                  case "DGD":
+                      return 4;   // Degraded
+                  case "OfLn":
+                  case "Offln":
+                  case "Fld":
+                  case "Failed":
+                      return 5;   // Failed / offline
+                  default:
+                      return 0;   // Unknown
+              }
+          }
+
+          for (var i = 0; i < lines.length; i++) {
+              var line = lines[i].trim();
+              var fields = line.split(/\s+/);
+
+              if (fields.length < 3) {
+                  continue;
+              }
+
+              if (!/^\d+\/\d+$/.test(fields[0])) {
+                  continue;
+              }
+
+              found = true;
+              var code = vdStateCode(fields[2]);
+              if (code > worst) {
+                  worst = code;
+              }
+          }
+
+          if (!found) {
+              return 0;
+          }
+
+          return worst;
+      master_item:
+        key: ssh.run[perccli.vd.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+      tags:
+      - tag: component
+        value: raid
+      - tag: scope
+        value: availability
+      triggers:
+      - uuid: 54fd4362b1504c8bbb8c767f9fda23f6
+        expression: last(/Template PercCLI RAID SSH Password Components v2/perccli.vd.overall_health)>=4
+        name: 'PercCLI: Virtual drive is degraded or failed'
+        priority: HIGH
+        opdata: 'Current health: {ITEM.LASTVALUE1}'
+        tags:
+        - tag: scope
+          value: availability
+    - uuid: 9ab9e607714442939dd96ceb8de595b6
+      name: 'PercCLI: Controller health'
+      type: DEPENDENT
+      key: perccli.controller.health
+      history: 30d
+      valuemap:
+        name: PercCLI Health Status
+      preprocessing:
+      - type: JAVASCRIPT
+        parameters:
+        - |-
+          var lines = value.split(/\r?\n/);
+
+          function controllerHealthCode(health) {
+              switch (health) {
+                  case "Safe":
+                  case "Optl":
+                  case "OK":
+                      return 1;   // Healthy
+                  case "NdAtn":
+                      return 3;   // Warning
+                  case "Dgrd":
+                      return 4;   // Critical / Degraded
+                  case "Fld":
+                  case "Failed":
+                      return 5;   // Failed
+                  default:
+                      return 0;   // Unknown
+              }
+          }
+
+          for (var i = 0; i < lines.length; i++) {
+              var line = lines[i].trim();
+              if (/^\d+\s+\S+/.test(line)) {
+                  var fields = line.split(/\s+/);
+                  return controllerHealthCode(fields[fields.length - 1]);
+              }
+          }
+          return 0;
+      master_item:
+        key: ssh.run[perccli.controller.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+      tags:
+      - tag: component
+        value: controller
+      - tag: scope
+        value: availability
+      triggers:
+      - uuid: 17f03ea957de496eaf0a569037e53024
+        expression: last(/Template PercCLI RAID SSH Password Components v2/perccli.controller.health)=3
+        name: 'PercCLI: Controller needs attention'
+        priority: WARNING
+        opdata: 'Current health: {ITEM.LASTVALUE1}'
+        tags:
+        - tag: scope
+          value: availability
+      - uuid: 7b3bb85ae22e463c982ace2aa7fd62a9
+        expression: last(/Template PercCLI RAID SSH Password Components v2/perccli.controller.health)>=4
+        name: 'PercCLI: Controller critical or failed'
+        priority: HIGH
+        opdata: 'Current health: {ITEM.LASTVALUE1}'
+        tags:
+        - tag: scope
+          value: availability
+    - uuid: 20a92cd3109d44799a89fe6fb64adf3f
+      name: 'PercCLI: Controller BBU status'
+      type: DEPENDENT
+      key: perccli.controller.bbu_status
+      history: 30d
+      valuemap:
+        name: PercCLI Health Status
+      preprocessing:
+      - type: JAVASCRIPT
+        parameters:
+        - |-
+          var lines = value.split(/\r?\n/);
+
+          function bbuCode(status) {
+              switch (status) {
+                  case "On":
+                  case "Opt":
+                  case "Optl":
+                  case "OK":
+                      return 1;   // Healthy
+                  case "NdAtn":
+                  case "Dgd":
+                  case "Dgrd":
+                      return 4;   // Critical / Degraded
+                  case "Fld":
+                  case "Failed":
+                  case "Missing":
+                      return 5;   // Failed
+                  case "-":
+                  case "NA":
+                  case "N/A":
+                      return 0;   // Unknown / not present
+                  default:
+                      return 0;
+              }
+          }
+
+          for (var i = 0; i < lines.length; i++) {
+              var line = lines[i].trim();
+              if (/^\d+\s+\S+/.test(line)) {
+                  var fields = line.split(/\s+/);
+                  /*
+                    System overview columns:
+                    Ctl Model Ports PDs DGs DNOpt VDs VNOpt BBU sPR DS EHS ASOs Hlth
+                    BBU is field index 8 when split by whitespace.
+                  */
+                  if (fields.length >= 14) {
+                      return bbuCode(fields[8]);
+                  }
+              }
+          }
+          return 0;
+      master_item:
+        key: ssh.run[perccli.controller.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+      tags:
+      - tag: component
+        value: controller
+      - tag: scope
+        value: storage
+      triggers:
+      - uuid: 277418b51c8d420b83c5d5fd1b16121b
+        expression: last(/Template PercCLI RAID SSH Password Components v2/perccli.controller.bbu_status)>=4
+        name: 'PercCLI: Controller BBU is not healthy'
+        priority: HIGH
+        opdata: 'Current BBU status: {ITEM.LASTVALUE1}'
+        tags:
+        - tag: scope
+          value: availability
+    - uuid: b9b0dc77b7a5447f84acf4e2e5791c26
+      name: 'PercCLI: Controller physical drive count'
+      type: DEPENDENT
+      key: perccli.controller.physical_drives_count
+      history: 30d
+      preprocessing:
+      - type: JAVASCRIPT
+        parameters:
+        - |-
+          var lines = value.split(/\r?\n/);
+          for (var i = 0; i < lines.length; i++) {
+              var line = lines[i].trim();
+              if (/^\d+\s+\S+/.test(line)) {
+                  var fields = line.split(/\s+/);
+                  if (fields.length >= 14) {
+                      return parseInt(fields[3], 10);
+                  }
+              }
+          }
+          return 0;
+      master_item:
+        key: ssh.run[perccli.controller.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+      tags:
+      - tag: component
+        value: controller
+      - tag: scope
+        value: storage
+    - uuid: 9952f4b6f64544d6a9cd16a4d7942b03
+      name: 'PercCLI: Controller virtual drive count'
+      type: DEPENDENT
+      key: perccli.controller.virtual_drives_count
+      history: 30d
+      preprocessing:
+      - type: JAVASCRIPT
+        parameters:
+        - |-
+          var lines = value.split(/\r?\n/);
+          for (var i = 0; i < lines.length; i++) {
+              var line = lines[i].trim();
+              if (/^\d+\s+\S+/.test(line)) {
+                  var fields = line.split(/\s+/);
+                  if (fields.length >= 14) {
+                      return parseInt(fields[6], 10);
+                  }
+              }
+          }
+          return 0;
+      master_item:
+        key: ssh.run[perccli.controller.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+      tags:
+      - tag: component
+        value: controller
+      - tag: scope
+        value: storage
+    discovery_rules:
+    - uuid: 61744faf71aa454a83de5f335feedf15
+      name: 'PercCLI: Disk discovery'
+      type: DEPENDENT
+      key: perccli.disk.discovery
+      lifetime: 7d
+      description: Discovers all physical disks from perccli /cX /eall /sall show.
+      preprocessing:
+      - type: JAVASCRIPT
+        parameters:
+        - |
+          var lines = value.split(/\r?\n/);
+          var data = [];
+
+          for (var i = 0; i < lines.length; i++) {
+              var line = lines[i].trim();
+
+              // Example:
+              // 32:3  3 Onln 0 446.625 GB SATA SSD N N 512B MZ7KM480HMHQ0D3 U -
+              var fields = line.split(/\s+/);
+
+              if (fields.length < 8) {
+                  continue;
+              }
+
+              if (!/^\d+:\d+$/.test(fields[0])) {
+                  continue;
+              }
+
+              var diskParts = fields[0].split(":");
+              var eid = diskParts[0];
+              var slot = diskParts[1];
+              var media = fields[7];
+
+              if (media !== "SSD" && media !== "HDD") {
+                  continue;
+              }
+
+              var model = "";
+              if (fields.length >= 12) {
+                  model = fields[11];
+              }
+
+              data.push({
+                  "{#EID}": eid,
+                  "{#SLOT}": slot,
+                  "{#DID}": fields[1],
+                  "{#STATE}": fields[2],
+                  "{#DG}": fields[3],
+                  "{#SIZE}": fields[4] + " " + fields[5],
+                  "{#INTF}": fields[6],
+                  "{#MEDIA}": media,
+                  "{#MODEL}": model,
+                  "{#DISKID}": eid + ":" + slot,
+                  "{#PDNAME}": media + " " + eid + ":" + slot + (model ? " " + model : "")
+              });
+          }
+
+          return JSON.stringify({"data": data});
+      master_item:
+        key: ssh.run[perccli.pd.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+      item_prototypes:
+      - uuid: 957b7e2f140947158fb68a30529df622
+        name: 'PercCLI Disk [{#DISKID}]: State'
+        type: DEPENDENT
+        key: perccli.disk.state[{#DISKID}]
+        history: 30d
+        valuemap:
+          name: PercCLI Health Status
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - |
+            var eid = "{#EID}";
+            var slot = "{#SLOT}";
+
+            function stateCode(state) {
+                switch (state) {
+                    case "Onln":
+                    case "Optl":
+                        return 1;   // Healthy
+                    case "DHS":
+                    case "GHS":
+                        return 2;   // Hot spare
+                    case "UGood":
+                    case "UGShld":
+                    case "HSPShld":
+                    case "CFShld":
+                    case "Cpybck":
+                    case "CBShld":
+                        return 3;   // Warning
+                    case "Rbld":
+                    case "Rblding":
+                    case "RblD":
+                    case "Dgrd":
+                    case "Pdgd":
+                        return 4;   // Critical / degraded
+                    case "Offln":
+                    case "UBad":
+                    case "Msng":
+                    case "UBUnsp":
+                        return 5;   // Failed / offline / missing
+                    default:
+                        return 0;   // Unknown
+                }
+            }
+
+            var lines = value.split(/\r?\n/);
+
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i].trim();
+                var fields = line.split(/\s+/);
+
+                if (fields.length < 3) {
+                    continue;
+                }
+
+                if (!/^\d+:\d+$/.test(fields[0])) {
+                    continue;
+                }
+
+                var diskParts = fields[0].split(":");
+
+                if (diskParts[0] === eid && diskParts[1] === slot) {
+                    return stateCode(fields[2]);
+                }
+            }
+
+            return 0;
+        master_item:
+          key: ssh.run[perccli.pd.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+        tags:
+        - tag: component
+          value: disk
+        - tag: disk
+          value: '{#DISKID}'
+        - tag: media
+          value: '{#MEDIA}'
+      - uuid: a38f4557d6ed4563a4d3583ccc76856e
+        name: 'PercCLI Disk [{#DISKID}]: Media type'
+        type: DEPENDENT
+        key: perccli.disk.media[{#DISKID}]
+        history: 30d
+        valuemap:
+          name: PercCLI Disk Media
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - |-
+            if ("{#MEDIA}" === "SSD") { return 1; }
+            if ("{#MEDIA}" === "HDD") { return 2; }
+            return 0;
+        master_item:
+          key: ssh.run[perccli.pd.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+        tags:
+        - tag: component
+          value: disk
+        - tag: disk
+          value: '{#DISKID}'
+      - uuid: 13d73f4c21a648948ce73e3dd64a4339
+        name: 'PercCLI Disk [{#DISKID}]: Model'
+        type: DEPENDENT
+        key: perccli.disk.model[{#DISKID}]
+        history: 30d
+        trends: '0'
+        value_type: CHAR
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - return "{#MODEL}";
+        master_item:
+          key: ssh.run[perccli.pd.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+        tags:
+        - tag: component
+          value: inventory
+        - tag: disk
+          value: '{#DISKID}'
+      - uuid: 36a30952b12f4a0f900b1d78d6a18594
+        name: 'PercCLI Disk [{#DISKID}]: Size'
+        type: DEPENDENT
+        key: perccli.disk.size[{#DISKID}]
+        history: 30d
+        trends: '0'
+        value_type: CHAR
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - return "{#SIZE}";
+        master_item:
+          key: ssh.run[perccli.pd.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+        tags:
+        - tag: component
+          value: inventory
+        - tag: disk
+          value: '{#DISKID}'
+      - uuid: c263d7013b9944cb9152da44c3d5accf
+        name: 'PercCLI Disk [{#DISKID}]: Predictive failure count'
+        type: SSH
+        key: ssh.run[perccli.disk.predictive_failure.{#EID}.{#SLOT},{HOST.CONN},{$PERC.SSH.PORT}]
+        delay: 10m
+        history: 30d
+        params: cd {$PERC.CLI.DIR} && {$PERC.SUDO} {$PERC.CLI.BIN} /c{$PERC.CONTROLLER} /e{#EID} /s{#SLOT} show all | awk -F= '/Predictive Failure Count/ {print $2+0; found=1} END {if (!found) print 0}'
+        authtype: PASSWORD
+        username: '{$PERC.SSH.USER}'
+        password: '{$PERC.SSH.PASSWORD}'
+        timeout: '{$PERC.SSH.TIMEOUT}'
+        tags:
+        - tag: component
+          value: disk
+        - tag: disk
+          value: '{#DISKID}'
+        - tag: media
+          value: '{#MEDIA}'
+        - tag: metric
+          value: predictive-failure
+      trigger_prototypes:
+      - uuid: 50d47388e2b4408b85ab8934962d767d
+        expression: last(/Template PercCLI RAID SSH Password Components v2/perccli.disk.state[{#DISKID}])=5
+        name: 'PercCLI Disk [{#DISKID}]: Failed, offline or missing'
+        priority: DISASTER
+        opdata: 'Current state: {ITEM.LASTVALUE1}'
+        tags:
+        - tag: scope
+          value: availability
+      - uuid: a30922f60dbc4abca5a2494cf47d5346
+        expression: last(/Template PercCLI RAID SSH Password Components v2/perccli.disk.state[{#DISKID}])=4
+        name: 'PercCLI Disk [{#DISKID}]: Degraded or rebuilding'
+        priority: HIGH
+        opdata: 'Current state: {ITEM.LASTVALUE1}'
+        tags:
+        - tag: scope
+          value: availability
+      - uuid: 7d3203bce5d544c2a17b2d146b4b7b72
+        expression: last(/Template PercCLI RAID SSH Password Components v2/perccli.disk.state[{#DISKID}])=3
+        name: 'PercCLI Disk [{#DISKID}]: Warning state'
+        priority: WARNING
+        opdata: 'Current state: {ITEM.LASTVALUE1}'
+        tags:
+        - tag: scope
+          value: availability
+      - uuid: c20ea7c760c3409f975c65d2a29a58fa
+        expression: last(/Template PercCLI RAID SSH Password Components v2/ssh.run[perccli.disk.predictive_failure.{#EID}.{#SLOT},{HOST.CONN},{$PERC.SSH.PORT}])>0
+        name: 'PercCLI Disk [{#DISKID}]: Predictive failure detected'
+        priority: HIGH
+        opdata: 'Predictive failures: {ITEM.LASTVALUE1}'
+        tags:
+        - tag: scope
+          value: availability
+    - uuid: e0b32e70ad8e44dd82002004ead94c04
+      name: 'PercCLI: SSD discovery'
+      type: DEPENDENT
+      key: perccli.ssd.discovery
+      lifetime: 7d
+      description: Discovers SSD physical disks only. Used for SSD life remaining from SMART E9.
+      preprocessing:
+      - type: JAVASCRIPT
+        parameters:
+        - |
+          var lines = value.split(/\r?\n/);
+          var data = [];
+
+          for (var i = 0; i < lines.length; i++) {
+              var line = lines[i].trim();
+              var fields = line.split(/\s+/);
+
+              if (fields.length < 8) {
+                  continue;
+              }
+
+              if (!/^\d+:\d+$/.test(fields[0])) {
+                  continue;
+              }
+
+              if (fields[7] !== "SSD") {
+                  continue;
+              }
+
+              var diskParts = fields[0].split(":");
+              var eid = diskParts[0];
+              var slot = diskParts[1];
+              var model = fields.length >= 12 ? fields[11] : "";
+
+              data.push({
+                  "{#EID}": eid,
+                  "{#SLOT}": slot,
+                  "{#DID}": fields[1],
+                  "{#STATE}": fields[2],
+                  "{#DG}": fields[3],
+                  "{#SIZE}": fields[4] + " " + fields[5],
+                  "{#INTF}": fields[6],
+                  "{#MEDIA}": fields[7],
+                  "{#MODEL}": model,
+                  "{#DISKID}": eid + ":" + slot,
+                  "{#PDNAME}": "SSD " + eid + ":" + slot + (model ? " " + model : "")
+              });
+          }
+
+          return JSON.stringify({"data": data});
+      master_item:
+        key: ssh.run[perccli.pd.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+      item_prototypes:
+      - uuid: e85bd220a86b4ad283eccae671c8ae03
+        name: 'PercCLI SSD [{#DISKID}]: Life remaining'
+        type: DEPENDENT
+        key: perccli.ssd.life_remaining[{#DISKID}]
+        history: 90d
+        trends: 365d
+        units: '%'
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - |
+            var eid = "{#EID}";
+            var slot = "{#SLOT}";
+
+            var blockRegex = new RegExp(
+                "Smart Data Info\\s+\\/c\\d+\\/e" + eid + "\\/s" + slot + "\\s*=([\\s\\S]*?)(?=\\r?\\n\\s*Smart Data Info\\s+\\/c\\d+\\/e\\d+\\/s\\d+\\s*=|$)",
+                "i"
+            );
+
+            var blockMatch = value.match(blockRegex);
+
+            if (!blockMatch) {
+                throw "SMART block not found for e" + eid + "/s" + slot;
+            }
+
+            var hex = blockMatch[1].match(/\b[0-9a-fA-F]{2}\b/g);
+
+            if (!hex) {
+                throw "No SMART hex data found for e" + eid + "/s" + slot;
+            }
+
+            // ATA SMART: first 2 bytes are header/revision, then 30 attributes of 12 bytes.
+            // Attribute E9/E8 current normalized value is byte 3 inside the 12-byte record.
+            for (var i = 2; i + 11 < hex.length; i += 12) {
+                var attrId = hex[i].toLowerCase();
+
+                if (attrId === "e9" || attrId === "e8") {
+                    var life = parseInt(hex[i + 3], 16);
+
+                    if (life > 100) {
+                        life = 100;
+                    }
+
+                    return life;
+                }
+            }
+
+            throw "SMART E9/E8 life attribute not found for e" + eid + "/s" + slot;
+        master_item:
+          key: ssh.run[perccli.smart.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+        tags:
+        - tag: component
+          value: ssd
+        - tag: disk
+          value: '{#DISKID}'
+        - tag: scope
+          value: capacity
+      trigger_prototypes:
+      - uuid: 7894363cb5944f46bd711c4884944d32
+        expression: last(/Template PercCLI RAID SSH Password Components v2/perccli.ssd.life_remaining[{#DISKID}])<{$PERC.SSD.LIFE.DISASTER}
+        name: 'PercCLI SSD [{#DISKID}]: Life remaining below {$PERC.SSD.LIFE.DISASTER}%'
+        priority: DISASTER
+        opdata: 'Life remaining: {ITEM.LASTVALUE1}'
+        tags:
+        - tag: scope
+          value: capacity
+      - uuid: 1922fc2ed5e34b42abbaaa141a9fc7b0
+        expression: last(/Template PercCLI RAID SSH Password Components v2/perccli.ssd.life_remaining[{#DISKID}])<{$PERC.SSD.LIFE.HIGH} and last(/Template PercCLI RAID SSH Password Components v2/perccli.ssd.life_remaining[{#DISKID}])>={$PERC.SSD.LIFE.DISASTER}
+        name: 'PercCLI SSD [{#DISKID}]: Life remaining below {$PERC.SSD.LIFE.HIGH}%'
+        priority: HIGH
+        opdata: 'Life remaining: {ITEM.LASTVALUE1}'
+        tags:
+        - tag: scope
+          value: capacity
+      - uuid: bf410c83f2704b93bfc604d30aea2f65
+        expression: last(/Template PercCLI RAID SSH Password Components v2/perccli.ssd.life_remaining[{#DISKID}])<{$PERC.SSD.LIFE.WARN} and last(/Template PercCLI RAID SSH Password Components v2/perccli.ssd.life_remaining[{#DISKID}])>={$PERC.SSD.LIFE.HIGH}
+        name: 'PercCLI SSD [{#DISKID}]: Life remaining below {$PERC.SSD.LIFE.WARN}%'
+        priority: WARNING
+        opdata: 'Life remaining: {ITEM.LASTVALUE1}'
+        tags:
+        - tag: scope
+          value: capacity
+    - uuid: 2162028021484f33ab434ad57935fc63
+      name: 'PercCLI: HDD discovery'
+      type: DEPENDENT
+      key: perccli.hdd.discovery
+      lifetime: 7d
+      description: Discovers HDD physical disks only. Used for HDD health.
+      preprocessing:
+      - type: JAVASCRIPT
+        parameters:
+        - |
+          var lines = value.split(/\r?\n/);
+          var data = [];
+
+          for (var i = 0; i < lines.length; i++) {
+              var line = lines[i].trim();
+              var fields = line.split(/\s+/);
+
+              if (fields.length < 8) {
+                  continue;
+              }
+
+              if (!/^\d+:\d+$/.test(fields[0])) {
+                  continue;
+              }
+
+              if (fields[7] !== "HDD") {
+                  continue;
+              }
+
+              var diskParts = fields[0].split(":");
+              var eid = diskParts[0];
+              var slot = diskParts[1];
+              var model = fields.length >= 12 ? fields[11] : "";
+
+              data.push({
+                  "{#EID}": eid,
+                  "{#SLOT}": slot,
+                  "{#DID}": fields[1],
+                  "{#STATE}": fields[2],
+                  "{#DG}": fields[3],
+                  "{#SIZE}": fields[4] + " " + fields[5],
+                  "{#INTF}": fields[6],
+                  "{#MEDIA}": fields[7],
+                  "{#MODEL}": model,
+                  "{#DISKID}": eid + ":" + slot,
+                  "{#PDNAME}": "HDD " + eid + ":" + slot + (model ? " " + model : "")
+              });
+          }
+
+          return JSON.stringify({"data": data});
+      master_item:
+        key: ssh.run[perccli.pd.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+      item_prototypes:
+      - uuid: 77906c49389a4e859f98c73e14dced53
+        name: 'PercCLI HDD [{#DISKID}]: Health'
+        type: DEPENDENT
+        key: perccli.hdd.health[{#DISKID}]
+        history: 30d
+        valuemap:
+          name: PercCLI Health Status
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - |
+            var eid = "{#EID}";
+            var slot = "{#SLOT}";
+
+            function stateCode(state) {
+                switch (state) {
+                    case "Onln":
+                    case "Optl":
+                        return 1;   // Healthy
+                    case "DHS":
+                    case "GHS":
+                        return 2;   // Hot spare
+                    case "UGood":
+                    case "UGShld":
+                    case "HSPShld":
+                    case "CFShld":
+                    case "Cpybck":
+                    case "CBShld":
+                        return 3;   // Warning
+                    case "Rbld":
+                    case "Rblding":
+                    case "RblD":
+                    case "Dgrd":
+                    case "Pdgd":
+                        return 4;   // Critical / degraded
+                    case "Offln":
+                    case "UBad":
+                    case "Msng":
+                    case "UBUnsp":
+                        return 5;   // Failed / offline / missing
+                    default:
+                        return 0;   // Unknown
+                }
+            }
+
+            var lines = value.split(/\r?\n/);
+
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i].trim();
+                var fields = line.split(/\s+/);
+
+                if (fields.length < 3) {
+                    continue;
+                }
+
+                if (!/^\d+:\d+$/.test(fields[0])) {
+                    continue;
+                }
+
+                var diskParts = fields[0].split(":");
+
+                if (diskParts[0] === eid && diskParts[1] === slot) {
+                    return stateCode(fields[2]);
+                }
+            }
+
+            return 0;
+        master_item:
+          key: ssh.run[perccli.pd.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+        tags:
+        - tag: component
+          value: hdd
+        - tag: disk
+          value: '{#DISKID}'
+        - tag: scope
+          value: availability
+      trigger_prototypes:
+      - uuid: 316bc29041a3448a9e3de7344f0f9807
+        expression: last(/Template PercCLI RAID SSH Password Components v2/perccli.hdd.health[{#DISKID}])>=4
+        name: 'PercCLI HDD [{#DISKID}]: Critical health'
+        priority: HIGH
+        opdata: 'Current health: {ITEM.LASTVALUE1}'
+        tags:
+        - tag: scope
+          value: availability
+      - uuid: 82256aa39925444faf885decbcb07c9b
+        expression: last(/Template PercCLI RAID SSH Password Components v2/perccli.hdd.health[{#DISKID}])=3
+        name: 'PercCLI HDD [{#DISKID}]: Warning health'
+        priority: WARNING
+        opdata: 'Current health: {ITEM.LASTVALUE1}'
+        tags:
+        - tag: scope
+          value: availability
+    - uuid: 158feadbab614aacbfa4d0ab3bf59403
+      name: 'PercCLI: Virtual drive discovery'
+      type: DEPENDENT
+      key: perccli.vd.discovery
+      lifetime: 30d
+      description: Discovers individual virtual drives from perccli /vall show.
+      preprocessing:
+      - type: JAVASCRIPT
+        parameters:
+        - |
+          var lines = value.split(/\r?\n/);
+          var data = [];
+
+          for (var i = 0; i < lines.length; i++) {
+              var line = lines[i].trim();
+              var fields = line.split(/\s+/);
+
+              // Common perccli /vall show row:
+              // 0/0 RAID1 Optl RW Yes RWTD - OFF 446.625 GB Name
+              if (fields.length < 10) {
+                  continue;
+              }
+
+              if (!/^\d+\/\d+$/.test(fields[0])) {
+                  continue;
+              }
+
+              var vdParts = fields[0].split("/");
+              var dg = vdParts[0];
+              var vd = vdParts[1];
+
+              var name = "";
+              if (fields.length > 10) {
+                  name = fields.slice(10).join(" ");
+              }
+              if (name === "") {
+                  name = "VD-" + dg + "-" + vd;
+              }
+
+              data.push({
+                  "{#VD_DG}": dg,
+                  "{#VD}": vd,
+                  "{#VDID}": dg + "/" + vd,
+                  "{#VDKEY}": dg + "_" + vd,
+                  "{#VDTYPE}": fields[1],
+                  "{#VDSTATE}": fields[2],
+                  "{#VDACCESS}": fields[3],
+                  "{#VDCONSIST}": fields[4],
+                  "{#VDCACHE}": fields[5],
+                  "{#VD_CAC}": fields[6],
+                  "{#VD_SCC}": fields[7],
+                  "{#VDSIZE}": fields[8] + " " + fields[9],
+                  "{#VDNAME}": name
+              });
+          }
+
+          return JSON.stringify({"data": data});
+      master_item:
+        key: ssh.run[perccli.vd.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+      item_prototypes:
+      - uuid: 892bdb48063a450a9bacfa17130ae7dd
+        name: 'PercCLI Virtual Drive [{#VDID}] {#VDNAME}: Health'
+        type: DEPENDENT
+        key: perccli.vd.health[{#VDKEY}]
+        history: 30d
+        valuemap:
+          name: PercCLI Health Status
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - |
+            var dg = "{#VD_DG}";
+            var vd = "{#VD}";
+
+            function vdStateCode(state) {
+                switch (state) {
+                    case "Optl":
+                        return 1;   // Healthy
+                    case "Pdgd":
+                    case "Dgrd":
+                    case "DGD":
+                        return 4;   // Degraded
+                    case "OfLn":
+                    case "Offln":
+                    case "Fld":
+                    case "Failed":
+                        return 5;   // Failed / offline
+                    default:
+                        return 0;   // Unknown
+                }
+            }
+
+            var lines = value.split(/\r?\n/);
+
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i].trim();
+                var fields = line.split(/\s+/);
+
+                if (fields.length < 3) {
+                    continue;
+                }
+
+                if (!/^\d+\/\d+$/.test(fields[0])) {
+                    continue;
+                }
+
+                var vdParts = fields[0].split("/");
+
+                if (vdParts[0] === dg && vdParts[1] === vd) {
+                    return vdStateCode(fields[2]);
+                }
+            }
+
+            return 0;
+        master_item:
+          key: ssh.run[perccli.vd.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+        tags:
+        - tag: component
+          value: virtual-drive
+        - tag: vd
+          value: '{#VDID}'
+        - tag: raid
+          value: '{#VDTYPE}'
+      - uuid: 1b4b3786de774edb8e44bccfa8836597
+        name: 'PercCLI Virtual Drive [{#VDID}] {#VDNAME}: RAID type'
+        type: DEPENDENT
+        key: perccli.vd.raid_type[{#VDKEY}]
+        history: 30d
+        value_type: CHAR
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - return "{#VDTYPE}";
+        master_item:
+          key: ssh.run[perccli.vd.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+        tags:
+        - tag: component
+          value: virtual-drive
+        - tag: vd
+          value: '{#VDID}'
+      - uuid: ef65a717a49f4d57bb680a12c007c734
+        name: 'PercCLI Virtual Drive [{#VDID}] {#VDNAME}: Size'
+        type: DEPENDENT
+        key: perccli.vd.size[{#VDKEY}]
+        history: 30d
+        value_type: CHAR
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - return "{#VDSIZE}";
+        master_item:
+          key: ssh.run[perccli.vd.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+        tags:
+        - tag: component
+          value: virtual-drive
+        - tag: vd
+          value: '{#VDID}'
+      - uuid: 3cdb6f11ff144b328aec846ace74067c
+        name: 'PercCLI Virtual Drive [{#VDID}] {#VDNAME}: Access'
+        type: DEPENDENT
+        key: perccli.vd.access[{#VDKEY}]
+        history: 30d
+        value_type: CHAR
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - return "{#VDACCESS}";
+        master_item:
+          key: ssh.run[perccli.vd.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+        tags:
+        - tag: component
+          value: virtual-drive
+        - tag: vd
+          value: '{#VDID}'
+      - uuid: cea3241bd67043a79887035f2df8a00d
+        name: 'PercCLI Virtual Drive [{#VDID}] {#VDNAME}: Consistency'
+        type: DEPENDENT
+        key: perccli.vd.consistency[{#VDKEY}]
+        history: 30d
+        value_type: CHAR
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - return "{#VDCONSIST}";
+        master_item:
+          key: ssh.run[perccli.vd.raw,{HOST.CONN},{$PERC.SSH.PORT}]
+        tags:
+        - tag: component
+          value: virtual-drive
+        - tag: vd
+          value: '{#VDID}'
+      trigger_prototypes:
+      - uuid: c0bac24117f544759682d33b9d658c82
+        expression: last(/Template PercCLI RAID SSH Password Components v2/perccli.vd.health[{#VDKEY}])=5
+        name: 'PercCLI Virtual Drive [{#VDID}] {#VDNAME}: Failed or offline'
+        priority: DISASTER
+        opdata: 'Current VD health: {ITEM.LASTVALUE1}'
+        tags:
+        - tag: scope
+          value: availability
+      - uuid: 9ae9a7e334fd4cffb7a683282be487ac
+        expression: last(/Template PercCLI RAID SSH Password Components v2/perccli.vd.health[{#VDKEY}])=4
+        name: 'PercCLI Virtual Drive [{#VDID}] {#VDNAME}: Degraded'
+        priority: HIGH
+        opdata: 'Current VD health: {ITEM.LASTVALUE1}'
+        tags:
+        - tag: scope
+          value: availability
+    macros:
+    - macro: '{$PERC.SSH.USER}'
+      value: monitoring
+      description: SSH username on the monitored host.
+    - macro: '{$PERC.SSH.PASSWORD}'
+      type: SECRET_TEXT
+      value: CHANGEME
+      description: SSH password. Override on the host and keep as Secret text.
+    - macro: '{$PERC.SSH.PORT}'
+      value: '22'
+      description: SSH port.
+    - macro: '{$PERC.SSH.TIMEOUT}'
+      value: 30s
+      description: SSH item timeout.
+    - macro: '{$PERC.CLI}'
+      value: /opt/lsi/perccli/perccli
+      description: Legacy full path macro. New commands use {$PERC.CLI.DIR} and {$PERC.CLI.BIN}.
+    - macro: '{$PERC.CONTROLLER}'
+      value: '0'
+      description: PERC controller ID. For /c0 set this to 0.
+    - macro: '{$PERC.SUDO}'
+      value: ''
+      description: Set to sudo if perccli requires sudo. If used, configure NOPASSWD for perccli.
+    - macro: '{$PERC.SSD.LIFE.WARN}'
+      value: '20'
+      description: Warning threshold for SSD life remaining percentage.
+    - macro: '{$PERC.SSD.LIFE.HIGH}'
+      value: '10'
+      description: High threshold for SSD life remaining percentage.
+    - macro: '{$PERC.SSD.LIFE.DISASTER}'
+      value: '5'
+      description: Disaster threshold for SSD life remaining percentage.
+    - macro: '{$PERC.CLI.DIR}'
+      value: /opt/lsi/perccli
+      description: Directory containing perccli and libstorelib.so. The command runs from this directory.
+    - macro: '{$PERC.CLI.BIN}'
+      value: ./perccli
+      description: PercCLI executable name/path relative to {$PERC.CLI.DIR}.
+    valuemaps:
+    - uuid: c153351ad6e046d7b3912f6aaaffa416
+      name: PercCLI Health Status
+      mappings:
+      - value: '0'
+        newvalue: Unknown
+      - value: '1'
+        newvalue: Healthy
+      - value: '2'
+        newvalue: Hot Spare
+      - value: '3'
+        newvalue: Warning
+      - value: '4'
+        newvalue: Critical / Degraded
+      - value: '5'
+        newvalue: Failed / Offline / Missing
+    - uuid: c7b991b90c574f909222d7108eba536e
+      name: PercCLI Disk Media
+      mappings:
+      - value: '0'
+        newvalue: Unknown
+      - value: '1'
+        newvalue: SSD
+      - value: '2'
+        newvalue: HDD
+    tags:
+    - tag: class
+      value: storage
+    - tag: target
+      value: perccli
